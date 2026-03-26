@@ -4,96 +4,44 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Conferência de Rota | Rodacoop</title>
-    
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://onildopr.github.io/rodacoop.ui/css/rodacoop.css">
-    
     <style>
         body { background-color: #f4f7f6; font-family: 'Proxima Nova', sans-serif; }
-        
-        /* Ajustes de Layout para ficar igual ao Onildo */
-        .list-section { 
-            height: 320px; 
-            overflow-y: auto; 
-            background: #fff; 
-            border: 1px solid #dee2e6; 
-            border-radius: 4px; 
-            padding: 0; 
-            list-style: none;
-        }
-        .list-group-item { 
-            padding: 6px 10px; 
-            font-family: 'Courier New', monospace; 
-            font-size: 13px; 
-            border-bottom: 1px solid #f1f1f1 !important; 
-            margin: 0; 
-        }
-        
-        /* Botões e Inputs com design Rodacoop */
-        #barcode-input { 
-            font-weight: bold; 
-            font-size: 1.4rem; 
-            border: 3px solid #ff6a00; 
-            height: 60px; 
-            text-align: center; 
-            color: #333;
-            border-radius: 8px;
-        }
-        
-        .btn-orange { background-color: #ff6a00; color: white; font-weight: bold; border-radius: 6px; border: none; }
-        .btn-orange:hover { background-color: #e65f00; color: white; }
-        
-        .btn-black { background-color: #000; color: white; font-weight: bold; border-radius: 6px; border: none; }
-        .btn-black:hover { background-color: #333; color: white; }
-        
-        .brand-card { 
-            border: none; 
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08); 
-            border-radius: 10px; 
-        }
-
-        /* Cores da Barra de Progresso */
-        .progress { height: 18px; border-radius: 10px; background-color: #e9ecef; }
+        .list-section { height: 320px; overflow-y: auto; background: #fff; border: 1px solid #dee2e6; border-radius: 4px; padding: 0; list-style: none; }
+        .list-group-item { padding: 6px 10px; font-family: monospace; font-size: 11px; border-bottom: 1px solid #f1f1f1 !important; }
+        .motivo { font-size: 9px; color: #cc0000; display: block; font-weight: bold; text-transform: uppercase; }
+        #barcode-input { font-weight: bold; font-size: 1.4rem; border: 3px solid #ff6a00; height: 60px; text-align: center; border-radius: 8px; }
+        .btn-orange { background-color: #ff6a00; color: white; font-weight: bold; border: none; }
+        .btn-black { background-color: #000; color: white; font-weight: bold; border: none; }
         .progress-bar { background-color: #ff6a00; }
-        
-        h2.brand-title { font-size: 24px; margin-bottom: 5px; }
-        .brand-subtle { font-size: 14px; color: #666; margin-bottom: 20px; }
+        /* Estilo da caixa de visualização da mensagem */
+        #whatsapp-preview { font-family: monospace; font-size: 13px; background-color: #e9f5ff; border: 1px solid #b3d7ff; color: #333; resize: none; }
     </style>
 </head>
 <body class="rk-scope">
 
 <div class="container pt-4">
     <div class="row">
-        <div class="col-md-10 offset-md-1 col-lg-8 offset-lg-2">
+        <div class="col-lg-10 offset-lg-1">
             
             <div id="setup-view">
                 <div class="text-center">
                     <h2 class="brand-title">Conferência de Rota</h2>
-                    <div class="brand-subtle">IDs PENDENTES / INSUCESSOS</div>
+                    <div class="brand-subtle">VISUALIZAÇÃO DE RELATÓRIO ATIVA</div>
                 </div>
 
                 <div class="card mb-3 brand-card">
                     <div class="card-body">
-                        <h5 class="brand-title" style="font-size:16px;">Rotas salvas</h5>
-                        <div class="row no-gutters">
-                            <div class="col-8 pr-2">
-                                <select id="saved-routes" class="form-control"><option>(Nenhuma selecionada)</option></select>
-                            </div>
-                            <div class="col-4">
-                                <button class="btn btn-orange btn-block">Carregar</button>
-                            </div>
-                        </div>
-                        <button class="btn btn-black btn-block mt-3" style="height: 45px;">FECHAMENTO DIÁRIO</button>
+                        <h5 class="brand-title" style="font-size:16px;">Importar Arquivo HTML</h5>
+                        <input type="file" id="file-input" class="form-control-file mb-3" accept=".html">
+                        <hr>
+                        <h5 class="brand-title" style="font-size:16px;">Ou cole o Código (Ctrl+U)</h5>
+                        <textarea id="html-input" class="form-control mb-3" rows="4" placeholder="Cole aqui..."></textarea>
+                        <button id="import-btn" class="btn btn-primary btn-lg btn-block font-weight-bold">IMPORTAR ROTA</button>
                     </div>
                 </div>
-
-                <div class="card brand-card">
-                    <div class="card-body">
-                        <h5 class="brand-title" style="font-size:16px;">Importar Nova Rota</h5>
-                        <textarea id="html-input" class="form-control mb-3" rows="6" placeholder="Cole o HTML (Ctrl+U) aqui..."></textarea>
-                        <button id="import-btn" class="btn btn-primary btn-lg btn-block font-weight-bold" style="height: 55px; font-size: 16px;">Importar/Salvar Rotas do HTML</button>
-                    </div>
-                </div>
+                <button class="btn btn-black btn-block" style="height: 45px;">FECHAMENTO DIÁRIO</button>
             </div>
 
             <div id="work-view" class="d-none">
@@ -105,121 +53,148 @@
                 <div class="card mb-3 brand-card">
                     <div class="card-body text-center">
                         <div class="row">
-                            <div class="col-6 border-right">
+                            <div class="col-4 border-right">
                                 <div class="small text-muted font-weight-bold">PENDENTES</div>
-                                <strong id="count-pending" style="font-size: 34px; color: #333;">0</strong>
+                                <strong id="count-pending" style="font-size: 28px;">0</strong>
                             </div>
-                            <div class="col-6">
-                                <div class="small text-muted font-weight-bold text-success">RECEBIDOS</div>
-                                <strong id="count-done" style="font-size: 34px;" class="text-success">0</strong>
+                            <div class="col-4 border-right">
+                                <div class="small text-muted font-weight-bold text-success">ENTREGUES</div>
+                                <strong id="count-done" style="font-size: 28px;" class="text-success">0</strong>
+                            </div>
+                            <div class="col-4">
+                                <div class="small text-muted font-weight-bold text-danger">INSUCESSOS</div>
+                                <strong id="count-fail" style="font-size: 28px;" class="text-danger">0</strong>
                             </div>
                         </div>
-                        <div class="progress mt-3">
-                            <div id="bar" class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
-                        </div>
+                        <div class="progress mt-3"><div id="bar" class="progress-bar" style="width: 0%"></div></div>
                     </div>
                 </div>
 
                 <input type="text" id="barcode-input" class="form-control mb-4" placeholder="BIPE O PACOTE AQUI" autofocus autocomplete="off">
 
-                <div class="row text-center no-gutters">
-                    <div class="col-3 px-1"><h6>OK</h6><ul id="list-ok" class="list-section"></ul></div>
-                    <div class="col-3 px-1"><h6>Pendente</h6><ul id="list-pending" class="list-section"></ul></div>
-                    <div class="col-3 px-1"><h6>Fora</h6><ul id="list-error" class="list-section"></ul></div>
-                    <div class="col-3 px-1"><h6>Dup</h6><ul id="list-dup" class="list-section"></ul></div>
+                <div class="row text-center no-gutters mb-4">
+                    <div class="col-4 px-1"><h6>OK/Entregue</h6><ul id="list-ok" class="list-section"></ul></div>
+                    <div class="col-4 px-1"><h6>Pendentes</h6><ul id="list-pending" class="list-section"></ul></div>
+                    <div class="col-4 px-1"><h6>Insucessos</h6><ul id="list-fail" class="list-section"></ul></div>
                 </div>
 
-                <button id="msg-btn" class="btn btn-success btn-lg btn-block mt-4 font-weight-bold" style="height: 60px;">GERAR MENSAGEM WHATSAPP</button>
-                <button onclick="location.reload()" class="btn btn-link btn-block text-muted mt-2">Sair desta rota</button>
-            </div>
+                <div class="card brand-card mb-3">
+                    <div class="card-body p-2">
+                        <label class="small font-weight-bold text-primary">PRÉ-VISUALIZAÇÃO DO RELATÓRIO:</label>
+                        <textarea id="whatsapp-preview" class="form-control" rows="8" readonly></textarea>
+                    </div>
+                </div>
 
+                <button id="msg-btn" class="btn btn-success btn-lg btn-block font-weight-bold" style="height: 60px;">COPIAR MENSAGEM WHATSAPP</button>
+                <button onclick="location.reload()" class="btn btn-link btn-block text-muted">Sair desta rota</button>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-let app = { pendentes: [], ok: [], fora: [], id: "", nome: "" };
+let app = { pendentes: [], entregues: [], insucessos: [], id: "", nome: "" };
 
-// IMPORTAÇÃO
-document.getElementById('import-btn').onclick = function() {
-    const raw = document.getElementById('html-input').value;
-    if(!raw) return alert("Cole o HTML!");
-
-    // Metadados
+function processarHTML(raw) {
     const idM = raw.match(/detail\/(\d+)/);
     app.id = idM ? idM[1] : "---";
     const titleM = raw.match(/<title[^>]*>.*?\|\s*([^<|]+)/i);
     app.nome = titleM ? titleM[1].trim() : "Rota EMN1";
 
-    // FILTRO EXCLUSIVO shipment_id (como solicitado)
-    const regex = /"shipment_id":\s*(\d{11})/g;
-    let match, ids = [];
-    while ((match = regex.exec(raw)) !== null) { ids.push(match[1]); }
+    const regexPacote = /"shipment_id":\s*(\d{11}),.*?"status":"(.*?)"(?:.*?"substatus":"(.*?)")?/g;
+    let match;
+    app.pendentes = []; app.entregues = []; app.insucessos = [];
 
-    if(ids.length > 0) {
-        app.pendentes = [...new Set(ids)].filter(x => x !== app.id);
+    while ((match = regexPacote.exec(raw)) !== null) {
+        let id = match[1];
+        let status = match[2];
+        let motivo = match[3] || "PENDENTE";
+        let pacote = { id, motivo: motivo.replace(/_/g, ' ') };
+
+        if (status === 'delivered') app.entregues.push(pacote);
+        else if (status === 'not_delivered' || status === 'cancelled') app.insucessos.push(pacote);
+        else app.pendentes.push(pacote);
+    }
+
+    if(app.pendentes.length + app.entregues.length + app.insucessos.length > 0) {
         document.getElementById('route-name').innerText = "Rota: " + app.nome;
         document.getElementById('route-id').innerText = "ID: " + app.id;
         document.getElementById('setup-view').classList.add('d-none');
         document.getElementById('work-view').classList.remove('d-none');
         render();
-        setTimeout(() => document.getElementById('barcode-input').focus(), 500);
-    } else {
-        alert("Nenhum shipment_id de 11 dígitos encontrado!");
-    }
+    } else { alert("Erro: Dados não encontrados!"); }
+}
+
+document.getElementById('import-btn').onclick = () => processarHTML(document.getElementById('html-input').value);
+document.getElementById('file-input').onchange = (e) => {
+    const reader = new FileReader();
+    reader.onload = (ev) => processarHTML(ev.target.result);
+    reader.readAsText(e.target.files[0]);
 };
 
-// BIPAGEM
 document.getElementById('barcode-input').onkeypress = function(e) {
     if (e.key === 'Enter') {
         const val = this.value.trim();
-        if (!val) return;
-        if (app.pendentes.includes(val)) {
-            app.pendentes = app.pendentes.filter(p => p !== val);
-            app.ok.unshift(val);
+        let pIndex = app.pendentes.findIndex(p => p.id === val);
+        if (pIndex !== -1) {
+            app.entregues.unshift(app.pendentes.splice(pIndex, 1)[0]);
             beep(880);
-        } else if (app.ok.includes(val)) {
-            alert("Pacote já lido!");
-        } else {
-            if(!app.fora.includes(val)) app.fora.unshift(val);
-            beep(350);
-        }
+        } else { beep(350); }
         this.value = "";
         render();
     }
 };
 
-// WHATSAPP
-document.getElementById('msg-btn').onclick = function() {
-    const total = app.pendentes.length + app.ok.length;
-    const ds = total > 0 ? ((app.ok.length / total) * 100).toFixed(1) : "0.0";
+function gerarTextoRelatorio() {
+    const total = app.pendentes.length + app.entregues.length + app.insucessos.length;
+    const ds = total > 0 ? ((app.entregues.length / total) * 100).toFixed(1) : "0.0";
     const hora = new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
     
-    let msg = `↩ RTS - Rota: ${app.id}\n🏭 SVC/XPT: EMN1 - Imperatriz\n🕗 ORHC: ${hora} h\n🟢 %DS: ${ds} %\n🟡 Pendentes: ${app.pendentes.length}\n🔴 Insucessos: ${app.fora.length}\n\n♎ Justificativa:\nRota ${app.nome}\nrodacoop | Motorista\n\n`;
+    let msg = `↩ RTS - Rota: ${app.id}\n🏭 SVC/XPT: EMN1 - Imperatriz\n🕗 ORHC: ${hora} h\n🟢 %DS: ${ds} %\n🟡 Pendentes: ${app.pendentes.length}\n🔴 Insucessos: ${app.insucessos.length}\n\n♎ Justificativa:\nRota ${app.nome}\nrodacoop | Motorista\n\n`;
     
-    if(app.fora.length > 0) msg += `*Fora de Rota:*\n${app.fora.join('\n')}\n`;
-    if(app.pendentes.length > 0) msg += `\n*Pendentes:*\n${app.pendentes.join('\n')}`;
+    if(app.insucessos.length > 0) {
+        msg += `*Insucessos:*\n`;
+        app.insucessos.forEach(p => msg += `- ${p.id} (${p.motivo})\n`);
+    }
+    
+    if(app.pendentes.length > 0) {
+        msg += `\n*Pendentes:*\n`;
+        app.pendentes.forEach(p => msg += `- ${p.id}\n`);
+    }
+    return msg;
+}
 
-    navigator.clipboard.writeText(msg).then(() => alert("Copiado com sucesso!"));
+document.getElementById('msg-btn').onclick = function() {
+    const texto = gerarTextoRelatorio();
+    navigator.clipboard.writeText(texto).then(() => {
+        this.innerText = "✅ COPIADO!";
+        setTimeout(() => this.innerText = "COPIAR MENSAGEM WHATSAPP", 2000);
+    });
 };
 
 function render() {
     document.getElementById('count-pending').innerText = app.pendentes.length;
-    document.getElementById('count-done').innerText = app.ok.length;
-    const total = app.pendentes.length + app.ok.length;
-    document.getElementById('bar').style.width = (total > 0 ? (app.ok.length/total*100) : 0) + "%";
+    document.getElementById('count-done').innerText = app.entregues.length;
+    document.getElementById('count-fail').innerText = app.insucessos.length;
+    const total = app.pendentes.length + app.entregues.length;
+    document.getElementById('bar').style.width = (total > 0 ? (app.entregues.length/total*100) : 0) + "%";
 
-    document.getElementById('list-ok').innerHTML = app.ok.map(i => `<li class="list-group-item text-success">✅ ${i}</li>`).join('');
-    document.getElementById('list-pending').innerHTML = app.pendentes.map(i => `<li class="list-group-item text-danger">❌ ${i}</li>`).join('');
-    document.getElementById('list-error').innerHTML = app.fora.map(i => `<li class="list-group-item text-warning">⚠️ ${i}</li>`).join('');
+    document.getElementById('list-ok').innerHTML = app.entregues.map(p => `<li class="list-group-item text-success">✅ ${p.id}</li>`).join('');
+    document.getElementById('list-pending').innerHTML = app.pendentes.map(p => `<li class="list-group-item text-danger">❌ ${p.id}</li>`).join('');
+    document.getElementById('list-fail').innerHTML = app.insucessos.map(p => `<li class="list-group-item text-warning">⚠️ ${p.id}<span class="motivo">${p.motivo}</span></li>`).join('');
+    
+    // Atualiza a pré-visualização automaticamente
+    document.getElementById('whatsapp-preview').value = gerarTextoRelatorio();
 }
 
 function beep(f) {
-    const ctx = new AudioContext();
-    const osc = ctx.createOscillator();
-    osc.frequency.value = f;
-    osc.connect(ctx.destination);
-    osc.start(); osc.stop(ctx.currentTime + 0.1);
+    try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        osc.frequency.value = f;
+        osc.connect(ctx.destination);
+        osc.start(); osc.stop(ctx.currentTime + 0.1);
+    } catch(e) {}
 }
 </script>
 </body>
