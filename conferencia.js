@@ -3,32 +3,32 @@ let bancoDeDados = {
     pendentes: [],
     conferidos: [],
     foraRota: [],
-    nomeRota: "",
     idRota: "",
-    motorista: "Não Identificado"
+    nomeRota: ""
 };
 
-// --- 1. EXTRAIR DADOS E IDs DO HTML ---
+// --- 1. EXTRAIR IDs E DADOS DA ROTA ---
 document.getElementById('extract-btn').onclick = function() {
     const htmlInput = document.getElementById('html-input').value;
-    if (!htmlInput) return alert("Por favor, cole o HTML da rota!");
+    if (!htmlInput) return alert("Cole o HTML primeiro!");
 
     const parser = new DOMParser();
     const doc = parser.parseFromString(htmlInput, 'text/html');
 
-    // Captura ID da Rota e Nome da Rota do HTML
+    // Captura ID da Rota (Link) e Nome (Título)
     const rotaMatch = htmlInput.match(/detail\/(\d+)/);
-    bancoDeDados.idRota = rotaMatch ? rotaMatch[1] : "000000000";
+    bancoDeDados.idRota = rotaMatch ? rotaMatch[1] : "Não identificado";
     
     const titulo = doc.querySelector('title')?.innerText || "";
-    bancoDeDados.nomeRota = titulo.split('|')[1]?.trim() || "Rota Desconhecida";
+    bancoDeDados.nomeRota = titulo.includes('|') ? titulo.split('|')[1].trim() : "Rota";
 
-    // Busca IDs de 11 dígitos
+    // Busca IDs de 11 dígitos (Filtro que resolvemos)
     let encontrados = [];
     const nos = doc.querySelectorAll('a, td, span, div, p');
     nos.forEach(el => {
         const texto = el.innerText.trim();
         if (/^\d{11}$/.test(texto)) encontrados.push(texto);
+        
         const href = el.getAttribute('href') || '';
         const matchHref = href.match(/\d{11}/);
         if (matchHref) encontrados.push(matchHref[0]);
@@ -43,7 +43,7 @@ document.getElementById('extract-btn').onclick = function() {
         document.getElementById('conference-interface').classList.remove('d-none');
         atualizarPainel();
     } else {
-        alert("Nenhum pacote de 11 dígitos encontrado.");
+        alert("Nenhum ID de 11 dígitos encontrado no HTML.");
     }
 };
 
@@ -56,10 +56,10 @@ document.getElementById('barcode-input').addEventListener('keypress', function(e
         if (bancoDeDados.pendentes.includes(id)) {
             bancoDeDados.pendentes = bancoDeDados.pendentes.filter(p => p !== id);
             bancoDeDados.conferidos.push(id);
-            tocarSom(880); 
+            tocarSom(880); // Som Agudo (Sucesso)
         } else if (!bancoDeDados.conferidos.includes(id)) {
             bancoDeDados.foraRota.push(id);
-            tocarSom(300);
+            tocarSom(300); // Som Grave (Erro/Fora de Rota)
         }
 
         this.value = ""; 
@@ -74,7 +74,8 @@ document.getElementById('generate-report-btn').onclick = function() {
     const min = agora.getMinutes().toString().padStart(2, '0');
     
     const total = bancoDeDados.pendentes.length + bancoDeDados.conferidos.length;
-    const ds = ((bancoDeDados.conferidos.length / total) * 100 || 0).toFixed(1);
+    const entregues = bancoDeDados.conferidos.length;
+    const ds = total > 0 ? ((entregues / total) * 100).toFixed(1) : "0.0";
 
     let msg = `↩ RTS - Rota: ${bancoDeDados.idRota}\n`;
     msg += `🏭 SVC/XPT: EMN1 - Imperatriz\n`;
@@ -87,22 +88,22 @@ document.getElementById('generate-report-btn').onclick = function() {
     msg += `Rota ${bancoDeDados.nomeRota}\n`;
     msg += `rodacoop | Motorista\n\n`;
 
-    // Lista os Insucessos
+    // Adiciona IDs de Insucesso
     bancoDeDados.foraRota.forEach(id => {
         msg += `${id}: Pacote de outra área\n`;
     });
 
-    // Lista os Pendentes
+    // Adiciona IDs Pendentes
     bancoDeDados.pendentes.forEach(id => {
         msg += `${id}: pendente\n`;
     });
 
     navigator.clipboard.writeText(msg).then(() => {
-        alert("Relatório copiado com sucesso!");
+        alert("Relatório copiado! Agora cole no WhatsApp.");
     });
 };
 
-// --- FUNÇÕES AUXILIARES ---
+// --- FUNÇÕES DE APOIO ---
 function atualizarPainel() {
     document.getElementById('extracted-total').innerText = bancoDeDados.pendentes.length + bancoDeDados.conferidos.length;
     document.getElementById('verified-total').innerText = bancoDeDados.conferidos.length;
