@@ -3,119 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Conferência de Rota | Rodacoop</title>
+    <title>Conferência de Rota | Wivison</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://onildopr.github.io/rodacoop.ui/css/rodacoop.css">
     <style>
-        body { background-color: #f4f7f6; font-family: 'Proxima Nova', sans-serif; }
-        .list-section { height: 320px; overflow-y: auto; background: #fff; border: 1px solid #dee2e6; border-radius: 4px; padding: 0; list-style: none; }
-        .list-group-item { padding: 5px 10px; font-family: monospace; font-size: 11px; border-bottom: 1px solid #f1f1f1 !important; margin: 0; }
-        .motivo-tag { font-size: 9px; color: #d9534f; display: block; font-weight: bold; text-transform: uppercase; }
-        #barcode-input { font-weight: bold; font-size: 1.5rem; border: 3px solid #ff6a00; height: 60px; text-align: center; border-radius: 8px; }
-        .btn-orange { background-color: #ff6a00; color: white !important; font-weight: bold; }
-        .btn-black { background-color: #000; color: white !important; font-weight: bold; }
-        #whatsapp-preview { font-family: monospace; font-size: 12px; background-color: #fff; border: 1px solid #ced4da; color: #333; resize: none; border-radius: 4px; width: 100%; }
+        body { background-color: #f8f9fa; }
+        .brand-title { color: #ff6a00; font-weight: bold; }
+        .card { border-radius: 10px; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .list-section { height: 350px; overflow-y: auto; background: #fff; border: 1px solid #eee; border-radius: 5px; list-style: none; padding: 0; }
+        .list-group-item { font-family: 'Courier New', Courier, monospace; font-size: 13px; padding: 5px 10px; border-bottom: 1px solid #f9f9f9 !important; }
+        #barcode-input { height: 60px; font-size: 24px; text-align: center; border: 2px solid #ff6a00; font-weight: bold; color: #333; }
+        .stats-number { font-size: 32px; font-weight: bold; display: block; }
+        .motivo-tag { font-size: 10px; color: #dc3545; font-weight: bold; text-transform: uppercase; display: block; }
+        #whatsapp-preview { font-family: monospace; font-size: 12px; background: #f1f1f1; border: 1px solid #ccc; color: #333; }
     </style>
 </head>
-<body class="rk-scope">
+<body>
 
-<div class="container pt-4">
+<div class="container py-4">
     <div id="setup-view">
         <div class="text-center mb-4">
-            <h2 class="brand-title">Conferência de Rota</h2>
-            <div class="brand-subtle">VERSÃO COMPATÍVEL COM NOVO LAYOUT ML</div>
+            <h1 class="brand-title">CONFERÊNCIA DE ROTA</h1>
+            <p class="text-muted">Padrão Rodacoop - Imperatriz/MA</p>
         </div>
-        <div class="card shadow-sm">
+        
+        <div class="card">
             <div class="card-body">
-                <h5 class="brand-title" style="font-size:16px;">Importar do HTML (Ctrl+U)</h5>
-                <textarea id="html-input" class="form-control mb-3" rows="6" placeholder="Cole o código fonte (Ctrl+U) aqui..."></textarea>
-                <button id="import-btn" class="btn btn-primary btn-lg btn-block font-weight-bold">ANALISAR ROTA</button>
+                <label class="font-weight-bold">Cole o Código Fonte (Ctrl+U / Ctrl+A):</label>
+                <textarea id="html-input" class="form-control mb-3" rows="8" placeholder="Abra a rota no ML, aperte Ctrl+U, depois Ctrl+A, copie tudo e cole aqui..."></textarea>
+                <button id="import-btn" class="btn btn-warning btn-block btn-lg font-weight-bold text-white">CARREGAR DADOS DA ROTA</button>
             </div>
         </div>
     </div>
 
     <div id="work-view" class="d-none">
-        <div class="text-center mb-3">
-            <h2 id="ui-route-id" class="brand-title" style="color:#ff6a00; font-size: 28px;">---</h2>
-            <h5 id="ui-driver" class="brand-subtle">Motorista: ---</h5>
+        <div class="row mb-3">
+            <div class="col-12 text-center">
+                <h2 id="ui-route-id" class="brand-title">ROTA: ---</h2>
+                <p id="ui-driver" class="mb-0">Motorista: ---</p>
+            </div>
         </div>
 
-        <div class="card mb-3 text-center shadow-sm">
-            <div class="card-body py-2">
-                <div class="row">
-                    <div class="col-4 border-right"><h6>PENDENTES</h6><strong id="count-p" style="font-size: 30px;">0</strong></div>
-                    <div class="col-4 border-right text-success"><h6>RECEBIDOS</h6><strong id="count-ok" style="font-size: 30px;">0</strong></div>
-                    <div class="col-4 text-danger"><h6>FALHAS</h6><strong id="count-fail" style="font-size: 30px;">0</strong></div>
+        <div class="card mb-4">
+            <div class="card-body py-3">
+                <div class="row text-center">
+                    <div class="col-4 border-right">
+                        <span class="text-muted small">PENDENTES</span>
+                        <span id="count-p" class="stats-number text-dark">0</span>
+                    </div>
+                    <div class="col-4 border-right">
+                        <span class="text-muted small text-success">LIDOS</span>
+                        <span id="count-ok" class="stats-number text-success">0</span>
+                    </div>
+                    <div class="col-4">
+                        <span class="text-muted small text-danger">FALHAS</span>
+                        <span id="count-fail" class="stats-number text-danger">0</span>
+                    </div>
                 </div>
-                <div class="progress mt-2"><div id="ui-bar" class="progress-bar bg-warning" style="width: 0%"></div></div>
+                <div class="progress mt-3" style="height: 10px;">
+                    <div id="ui-bar" class="progress-bar bg-success" style="width: 0%"></div>
+                </div>
             </div>
         </div>
 
         <input type="text" id="barcode-input" class="form-control mb-4" placeholder="BIPE O PACOTE AQUI" autofocus autocomplete="off">
 
-        <div class="row text-center no-gutters mb-4">
-            <div class="col-3 px-1"><h6>OK</h6><ul id="list-ok" class="list-section"></ul></div>
-            <div class="col-3 px-1"><h6>Pendente</h6><ul id="list-pending" class="list-section"></ul></div>
-            <div class="col-3 px-1"><h6>Insucesso</h6><ul id="list-fail" class="list-section"></ul></div>
-            <div class="col-3 px-1"><h6>Fora</h6><ul id="list-out" class="list-section"></ul></div>
+        <div class="row no-gutters text-center mb-4">
+            <div class="col-3 px-1"><h6>LIDOS</h6><ul id="list-ok" class="list-section"></ul></div>
+            <div class="col-3 px-1"><h6>PENDENTES</h6><ul id="list-pending" class="list-section"></ul></div>
+            <div class="col-3 px-1"><h6>INSUCESSOS</h6><ul id="list-fail" class="list-section"></ul></div>
+            <div class="col-3 px-1"><h6>FORA</h6><ul id="list-out" class="list-section"></ul></div>
         </div>
 
-        <div class="card mb-3 shadow-sm">
+        <div class="card mb-3">
             <div class="card-body p-2">
-                <label class="small font-weight-bold text-primary">PRÉ-VISUALIZAÇÃO DO RELATÓRIO:</label>
-                <textarea id="whatsapp-preview" class="form-control" rows="6" readonly></textarea>
+                <textarea id="whatsapp-preview" class="form-control" rows="5" readonly></textarea>
             </div>
         </div>
 
-        <button id="copy-btn" class="btn btn-success btn-lg btn-block font-weight-bold">COPIAR MENSAGEM WHATSAPP</button>
-        <button onclick="location.reload()" class="btn btn-link btn-block text-muted">Sair da Rota</button>
+        <button id="copy-btn" class="btn btn-success btn-block btn-lg font-weight-bold">COPIAR PARA WHATSAPP</button>
+        <button onclick="location.reload()" class="btn btn-link btn-block text-muted">Limpar e Voltar</button>
     </div>
 </div>
 
 <script>
-let app = { id: "", nome: "", motorista: "", orh: "00:00", p: [], ok: [], fail: [], out: [] };
+let data = { id: "", driver: "", orh: "", p: [], ok: [], fail: [], out: [] };
 
 document.getElementById('import-btn').onclick = function() {
     const raw = document.getElementById('html-input').value;
-    if(!raw) return alert("Cole o código fonte!");
+    if(!raw) return alert("Cole o código primeiro!");
 
-    // Captura o ID da Rota do título ou URL
-    app.id = (raw.match(/detail\/(\d+)/) || raw.match(/Rota\s*(\d+)/) || ["", "---"])[1];
-    app.nome = (raw.match(/<title[^>]*>(.*?)<\/title>/i) || ["", "Detalhe de Rota"])[1].replace("Detalhe de Rota | ", "").trim();
-    
-    // Captura motorista e tempo no novo formato
-    app.motorista = (raw.match(/"driverName":"(.*?)"/) || raw.match(/"driver_name":"(.*?)"/) || ["", "Não informado"])[1];
-    app.orh = (raw.match(/"durationText":"(.*?)"/) || raw.match(/"duration":"(.*?)"/) || ["", "00:00"])[1];
+    // Extração inteligente baseada no seu HTML
+    data.id = (raw.match(/detail\/(\d+)/) || raw.match(/(\d{9,})/) || ["", "---"])[1];
+    data.driver = (raw.match(/"driverName":"(.*?)"/) || raw.match(/"driver_name":"(.*?)"/) || ["", "Não Encontrado"])[1];
+    data.orh = (raw.match(/"durationText":"(.*?)"/) || raw.match(/"duration":"(.*?)"/) || ["", "0h 00m"])[1];
 
-    // NOVO MOTOR DE BUSCA: Procura por padrões de IDs de 11 dígitos seguidos de status
-    // Este método é mais seguro para o novo layout
-    const idsEncontrados = raw.matchAll(/"id":(\d{11}),.*?"status":"(.*?)"(?:.*?"substatus":"(.*?)")?/g);
-    
-    app.p = []; app.ok = []; app.fail = []; app.out = [];
-    let vistos = new Set();
+    // Captura de Pacotes (Regex para IDs de 11 dígitos + Status)
+    const regex = /"id":(\d{11}),.*?"status":"(.*?)"(?:.*?"substatus":"(.*?)")?/g;
+    let match;
+    let foundIds = new Set();
+    data.p = []; data.ok = []; data.fail = [];
 
-    for (const m of idsEncontrados) {
-        let id = m[1];
-        if (vistos.has(id)) continue; // Evita duplicados do HTML
-        vistos.add(id);
+    while ((match = regex.exec(raw)) !== null) {
+        let id = match[1];
+        if (foundIds.has(id)) continue;
+        foundIds.add(id);
 
-        let status = m[2];
-        let motivo = (m[3] || "").replace(/_/g, ' ');
-        let item = { id, motivo };
+        let status = match[2];
+        let sub = (match[3] || "").replace(/_/g, ' ');
+        let obj = { id, motivo: sub };
 
-        if (status === 'delivered') app.ok.push(item);
-        else if (status === 'not_delivered' || status === 'cancelled') app.fail.push(item);
-        else app.p.push(item);
+        if (status === 'delivered') data.ok.push(obj);
+        else if (status === 'not_delivered' || status === 'cancelled') data.fail.push(obj);
+        else data.p.push(obj);
     }
 
-    if(vistos.size > 0) {
-        document.getElementById('ui-route-id').innerText = "Rota: " + app.id;
-        document.getElementById('ui-driver').innerText = "Motorista: " + app.motorista;
+    if(foundIds.size > 0) {
         document.getElementById('setup-view').classList.add('d-none');
         document.getElementById('work-view').classList.remove('d-none');
+        document.getElementById('ui-route-id').innerText = "ROTA: " + data.id;
+        document.getElementById('ui-driver').innerText = "Motorista: " + data.driver;
         render();
     } else {
-        alert("Não identifiquei os pacotes. Certifique-se de estar na página 'Detalhe de Rota' e ter copiado TUDO (Ctrl+A e Ctrl+C) no código fonte.");
+        alert("Nenhum pacote identificado. Certifique-se de copiar TODO o código da página (Ctrl+U -> Ctrl+A).");
     }
 };
 
@@ -123,52 +133,50 @@ document.getElementById('barcode-input').onkeypress = function(e) {
     if (e.key === 'Enter') {
         const val = this.value.trim();
         if(!val) return;
-        let pIdx = app.p.findIndex(x => x.id === val);
-        if (pIdx !== -1) {
-            app.ok.unshift(app.p.splice(pIdx, 1)[0]);
-            beep(880);
+        
+        let idx = data.p.findIndex(x => x.id === val);
+        if (idx !== -1) {
+            data.ok.unshift(data.p.splice(idx, 1)[0]);
+            playBeep(800);
         } else {
-            if(!app.out.includes(val)) app.out.unshift(val);
-            beep(350);
+            if(!data.out.includes(val)) data.out.unshift(val);
+            playBeep(300);
         }
         this.value = ""; render();
     }
 };
 
 function render() {
-    document.getElementById('count-p').innerText = app.p.length;
-    document.getElementById('count-ok').innerText = app.ok.length;
-    document.getElementById('count-fail').innerText = app.fail.length;
+    const total = data.p.length + data.ok.length + data.fail.length;
+    const perc = total > 0 ? ((data.ok.length / total) * 100).toFixed(1) : 0;
 
-    const total = app.p.length + app.ok.length + app.fail.length;
-    const ds = total > 0 ? ((app.ok.length / total) * 100).toFixed(1) : "0.0";
-    document.getElementById('ui-bar').style.width = ds + "%";
+    document.getElementById('count-p').innerText = data.p.length;
+    document.getElementById('count-ok').innerText = data.ok.length;
+    document.getElementById('count-fail').innerText = data.fail.length;
+    document.getElementById('ui-bar').style.width = perc + "%";
 
-    document.getElementById('list-ok').innerHTML = app.ok.map(x => `<li class="list-group-item text-success">✅ ${x.id}</li>`).join('');
-    document.getElementById('list-pending').innerHTML = app.p.map(x => `<li class="list-group-item text-danger">❌ ${x.id}</li>`).join('');
-    document.getElementById('list-fail').innerHTML = app.fail.map(x => `<li class="list-group-item text-warning">⚠️ ${x.id}<span class="motivo-tag">${x.motivo}</span></li>`).join('');
-    document.getElementById('list-out').innerHTML = app.out.map(x => `<li class="list-group-item text-dark">📦 ${x}</li>`).join('');
+    document.getElementById('list-ok').innerHTML = data.ok.map(x => `<li class="list-group-item text-success">✓ ${x.id}</li>`).join('');
+    document.getElementById('list-pending').innerHTML = data.p.map(x => `<li class="list-group-item text-muted">${x.id}</li>`).join('');
+    document.getElementById('list-fail').innerHTML = data.fail.map(x => `<li class="list-group-item text-danger">${x.id}<span class="motivo-tag">${x.motivo}</span></li>`).join('');
+    document.getElementById('list-out').innerHTML = data.out.map(x => `<li class="list-group-item text-warning">? ${x}</li>`).join('');
 
-    let msg = `↩ RTS - Rota: ${app.id}\n🏭 SVC/XPT: EMN1 - Imperatriz\n🕗 ORH: ${app.orh}\n🟢 %DS: ${ds} %\n🟡 Pendentes: ${app.p.length}\n🔴 Insucessos: ${app.fail.length}\n\n♎ Justificativa:\nRota ${app.nome}\nMotorista: ${app.motorista}\nrodacoop | Conferência\n`;
-    
-    if(app.fail.length > 0) {
-        msg += `\n*INSUCESSOS:*\n` + app.fail.map(f => `- ${f.id}: ${f.motivo}`).join('\n') + `\n`;
-    }
-    document.getElementById('whatsapp-preview').value = msg;
+    // Relatório formatado
+    let text = `↩ RTS - Rota: ${data.id}\n🏭 SVC/XPT: EMN1 - Imperatriz\n🕗 ORH: ${data.orh}\n🟢 %DS: ${perc}%\n🟡 Pendentes: ${data.p.length}\n🔴 Insucessos: ${data.fail.length}\n\n♎ Justificativa:\nMotorista: ${data.driver}\nSite: wivisonsants\n`;
+    document.getElementById('whatsapp-preview').value = text;
 }
 
 document.getElementById('copy-btn').onclick = function() {
     navigator.clipboard.writeText(document.getElementById('whatsapp-preview').value);
-    this.innerText = "✅ COPIADO!";
-    setTimeout(() => this.innerText = "COPIAR MENSAGEM WHATSAPP", 2000);
+    this.innerText = "COPIADO!";
+    setTimeout(() => this.innerText = "COPIAR PARA WHATSAPP", 2000);
 };
 
-function beep(f) {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = ctx.createOscillator();
-    osc.frequency.value = f;
-    osc.connect(ctx.destination);
-    osc.start(); osc.stop(ctx.currentTime + 0.1);
+function playBeep(freq) {
+    const actx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = actx.createOscillator();
+    osc.frequency.value = freq;
+    osc.connect(actx.destination);
+    osc.start(); osc.stop(actx.currentTime + 0.1);
 }
 </script>
 </body>
