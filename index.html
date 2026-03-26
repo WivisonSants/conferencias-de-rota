@@ -1,1 +1,69 @@
-<h1>Meu Site de Rotas</h1>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Rotas PMMA</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        body { font-family: sans-serif; margin: 0; padding: 10px; background: #f4f4f4; }
+        #map { height: 300px; width: 100%; border-radius: 8px; margin-bottom: 20px; }
+        .card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        input, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box; }
+        button { background: #007bff; color: white; border: none; font-weight: bold; cursor: pointer; }
+        button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>📍 Conferência de Rota</h2>
+        <div id="map"></div>
+        
+        <hr>
+        
+        <h2>📋 Fechamento de Rota</h2>
+        <label>Nome do Condutor:</label>
+        <input type="text" id="motorista" placeholder="Ex: João Silva">
+        
+        <label>KM Final:</label>
+        <input type="number" id="km" placeholder="Ex: 15420">
+        
+        <label>Observações:</label>
+        <input type="text" id="obs" placeholder="Alguma ocorrência?">
+        
+        <button onclick="gerarRelatorio()">ENCERRAR E GERAR PDF</button>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Inicializa o Mapa (Focado no Maranhão por padrão)
+        var map = L.map('map').setView([-2.53, -44.30], 12);
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        L.marker([-2.53, -44.30]).addTo(map).bindPopup('Ponto de Partida').openPopup();
+
+        // Função para gerar o PDF
+        async function gerarRelatorio() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            const nome = document.getElementById('motorista').value;
+            const km = document.getElementById('km').value;
+            const obs = document.getElementById('obs').value;
+            const data = new Date().toLocaleString();
+
+            doc.setFontSize(18);
+            doc.text("Relatório de Encerramento de Rota", 10, 20);
+            doc.setFontSize(12);
+            doc.text(`Data/Hora: ${data}`, 10, 35);
+            doc.text(`Motorista: ${nome}`, 10, 45);
+            doc.text(`KM Final: ${km}`, 10, 55);
+            doc.text(`Observações: ${obs}`, 10, 65);
+            
+            doc.save(`relatorio_rota_${nome}.pdf`);
+            alert("Relatório gerado com sucesso!");
+        }
+    </script>
+</body>
+</html>
