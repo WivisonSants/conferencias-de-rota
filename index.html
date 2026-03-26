@@ -3,132 +3,132 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Conferência de Rota - Rodacoop</title>
-  
+  <title>Conferência de Rota - IDs Pendentes</title>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://onildopr.github.io/rodacoop.ui/css/rodacoop.css">
-  
   <style>
-    /* Ajustes para a aparência ficar idêntica à do Onildo */
-    .list-section { height: 350px; overflow-y: auto; background: #fff; border: 1px solid #dee2e6; border-radius: 4px; }
-    .list-group-item { padding: 5px 10px; font-family: 'Courier New', Courier, monospace; font-size: 13px; border-bottom: 1px solid #eee !important; }
-    .brand-card { border: 1px solid rgba(0,0,0,.125); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-    #barcode-input { font-weight: bold; font-size: 1.2rem; border: 2px solid #ff6a00; }
-    #barcode-input:focus { box-shadow: 0 0 0 0.2rem rgba(255, 106, 0, 0.25); border-color: #ff6a00; }
+    .list-section { height: 300px; overflow-y: auto; background: #fff; border: 1px solid #dee2e6; border-radius: 4px; }
+    .list-group-item { padding: 4px 8px; font-family: monospace; font-size: 13px; border-bottom: 1px solid #eee !important; }
+    #barcode-input { font-weight: bold; border: 2px solid #ff6a00; height: 50px; }
+    .btn-orange { background-color: #ff6a00; color: white; border: none; }
+    .btn-orange:hover { background-color: #e65f00; color: white; }
+    .btn-black { background-color: #000; color: white; border: none; }
+    .btn-black:hover { background-color: #333; color: white; }
   </style>
 </head>
-
 <body class="rk-scope">
 
 <div class="container pt-4">
   <div class="row">
-    <div class="col-sm-1"></div>
-    <div class="col-sm-10">
-
+    <div class="col-sm-2"></div>
+    <div class="col-sm-8">
+      
       <div id="initial-interface">
-        <div class="text-center mb-4">
+        <div class="text-center mb-3">
           <h2 class="brand-title">Conferência de Rota</h2>
           <div class="brand-subtle">IDs pendentes / insucessos</div>
         </div>
 
         <div class="card mb-3 brand-card">
           <div class="card-body">
-            <h5 class="mb-2 brand-title" style="font-size:16px;">Importar Rota</h5>
-            <textarea id="html-input" class="form-control mb-3" rows="8" placeholder="Cole o HTML bruto da página do AdminML aqui..."></textarea>
-            <div class="text-center">
-                <button id="extract-btn" class="btn btn-primary btn-block">Importar/Salvar Rotas do HTML</button>
+            <h5 class="mb-2 brand-title" style="font-size:16px;">Rotas salvas</h5>
+            <div class="row">
+              <div class="col-md-8">
+                <select id="saved-routes" class="form-control">
+                  <option value="">(Nenhuma selecionada)</option>
+                </select>
+              </div>
+              <div class="col-md-4 mt-2 mt-md-0">
+                <button class="btn btn-orange btn-block">Carregar rota</button>
+              </div>
             </div>
+            <div class="row mt-2">
+              <div class="col-md-6">
+                <button class="btn btn-outline-danger btn-block">Excluir rota</button>
+              </div>
+              <div class="col-md-6 mt-2 mt-md-0">
+                <button class="btn btn-outline-secondary btn-block">Limpar todas</button>
+              </div>
+            </div>
+            <div class="row mt-2">
+              <div class="col-md-12">
+                <button class="btn btn-black btn-block">FECHAMENTO DIÁRIO</button>
+              </div>
+            </div>
+            <small class="text-muted d-block mt-2">Cole um HTML e clique em “Importar/Salvar Rotas”.</small>
           </div>
+        </div>
+
+        <textarea id="html-input" class="form-control mb-3" rows="8" placeholder="Insira o HTML bruto (pode colar mais de uma rota)"></textarea>
+        
+        <div class="text-center">
+          <button id="extract-btn" class="btn btn-primary mb-2">Importar/Salvar Rotas do HTML</button>
+          <button class="btn btn-secondary">Adicionar IDs Manualmente</button>
         </div>
       </div>
 
       <div id="conference-interface" class="d-none">
         <div class="text-center mb-3">
-          <h2 id="route-title" class="brand-title">Carregando Rota...</h2>
-          <h2 id="id-rota-display" class="brand-subtle" style="font-size:16px;">ID: ---</h2>
+          <h2 id="route-title" class="brand-title">---</h2>
+          <h4 id="id-rota-display" class="brand-subtle" style="font-size:16px;">ID: ---</h4>
         </div>
 
-        <div class="card mb-3 brand-card">
-          <div class="card-body">
-            <div class="row text-center">
-              <div class="col-6">
-                <div class="brand-subtle">Pacotes pendentes</div>
-                <strong><span id="extracted-total" style="font-size: 24px;">0</span></strong>
-              </div>
-              <div class="col-6">
-                <div class="brand-subtle">Pacotes Recebidos</div>
-                <strong><span id="verified-total" style="font-size: 24px;" class="text-success">0</span></strong>
-              </div>
-            </div>
-            <div class="progress mt-3" style="height: 10px;">
-              <div id="progress-bar" class="progress-bar bg-warning" role="progressbar" style="width: 0%"></div>
-            </div>
+        <div class="my-2">
+          <div>Pacotes pendentes: <strong><span id="extracted-total">0</span></strong></div>
+          <div>Pacotes Recebidos: <strong><span id="verified-total">0</span></strong></div>
+          <div class="progress my-2" style="height: 15px;">
+            <div id="progress-bar" class="progress-bar bg-warning" role="progressbar" style="width: 0%"></div>
           </div>
         </div>
 
         <input type="text" id="barcode-input" class="form-control mb-3 text-center" placeholder="Leia ou digite o código de barras" autofocus>
 
         <div class="row text-center mt-4">
-          <div class="col-md-4">
-            <h5 class="brand-title" style="font-size:14px;">Recebidos</h5>
-            <ul id="conferidos-list" class="list-group list-section"></ul>
-          </div>
-          <div class="col-md-4">
-            <h5 class="brand-title" style="font-size:14px;">Pendentes</h5>
-            <ul id="faltantes-list" class="list-group list-section"></ul>
-          </div>
-          <div class="col-md-4">
-            <h5 class="brand-title" style="font-size:14px;">Fora de Rota</h5>
-            <ul id="fora-rota-list" class="list-group list-section"></ul>
-          </div>
+          <div class="col-md-3"><h5>Recebidos</h5><ul id="conferidos-list" class="list-group list-section"></ul></div>
+          <div class="col-md-3"><h5>Pendentes</h5><ul id="faltantes-list" class="list-group list-section"></ul></div>
+          <div class="col-md-3"><h5>Fora de Rota</h5><ul id="fora-rota-list" class="list-group list-section"></ul></div>
+          <div class="col-md-3"><h5>Duplicados</h5><ul id="duplicados-list" class="list-group list-section"></ul></div>
         </div>
 
-        <div class="text-center my-4">
-          <button id="generate-report-btn" class="btn btn-success btn-block mb-2">GERAR MENSAGEM WHATSAPP 🚀</button>
-          <button onclick="location.reload()" class="btn btn-secondary btn-sm">Voltar / Limpar</button>
+        <div class="text-center my-3">
+          <button onclick="location.reload()" class="btn btn-secondary mr-2">Voltar</button>
+          <button id="generate-report-btn" class="btn btn-success">Gerar Mensagem WhatsApp</button>
         </div>
       </div>
 
     </div>
-    <div class="col-sm-1"></div>
+    <div class="col-sm-2"></div>
   </div>
 </div>
 
 <script>
+// A lógica que faz o site funcionar
 let bancoDeDados = { pendentes: [], conferidos: [], foraRota: [], idRota: "", nomeRota: "" };
 
-// LÓGICA DE EXTRAÇÃO
 document.getElementById('extract-btn').onclick = function() {
   const html = document.getElementById('html-input').value;
   if(!html) return;
-
   const idMatch = html.match(/detail\/(\d+)/);
   bancoDeDados.idRota = idMatch ? idMatch[1] : "---";
-  
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, 'text/html');
   const titulo = doc.querySelector('title')?.innerText || "";
-  bancoDeDados.nomeRota = titulo.includes('|') ? titulo.split('|')[1].trim() : "Rota Local";
-
+  bancoDeDados.nomeRota = titulo.includes('|') ? titulo.split('|')[1].trim() : "Rota";
   let encontrados = [];
   doc.querySelectorAll('a, td, span, div, p').forEach(el => {
     const txt = el.innerText.trim();
     if (/^\d{11}$/.test(txt)) encontrados.push(txt);
   });
-
   if(encontrados.length > 0) {
     bancoDeDados.pendentes = [...new Set(encontrados)];
-    document.getElementById('route-title').innerText = bancoDeDados.nomeRota;
+    document.getElementById('route-title').innerText = "Rota: " + bancoDeDados.nomeRota;
     document.getElementById('id-rota-display').innerText = "ID: " + bancoDeDados.idRota;
     document.getElementById('initial-interface').classList.add('d-none');
     document.getElementById('conference-interface').classList.remove('d-none');
     atualizar();
-  } else {
-    alert("Nenhum código de 11 dígitos encontrado no HTML.");
   }
 };
 
-// LÓGICA DE BIPAGEM
 document.getElementById('barcode-input').onkeypress = function(e) {
   if (e.key === 'Enter') {
     const id = this.value.trim();
@@ -147,29 +147,23 @@ document.getElementById('barcode-input').onkeypress = function(e) {
   }
 };
 
-// GERADOR DE MENSAGEM
 document.getElementById('generate-report-btn').onclick = function() {
   const total = bancoDeDados.pendentes.length + bancoDeDados.conferidos.length;
   const ds = total > 0 ? ((bancoDeDados.conferidos.length / total) * 100).toFixed(1) : "0.0";
   const h = new Date().getHours().toString().padStart(2, '0');
   const m = new Date().getMinutes().toString().padStart(2, '0');
-
-  let msg = `↩ RTS - Rota: ${bancoDeDados.idRota}\n🏭 SVC/XPT: EMN1 - Imperatriz\n🎯 Metas: %DS - 99% | ORHC - 85%\n🕗 ORHC: ${h}:${m} h\n🟢 %DS - Entregues: ${ds} %\n🟡 Pendentes: ${bancoDeDados.pendentes.length}\n🔴 Insucessos: ${bancoDeDados.foraRota.length}\n\n♎ Justificativa:\nRota ${bancoDeDados.nomeRota}\nrodacoop | Motorista\n\n`;
-  
+  let msg = `↩ RTS - Rota: ${bancoDeDados.idRota}\n🏭 SVC/XPT: EMN1 - Imperatriz\n🕗 ORHC: ${h}:${m} h\n🟢 %DS: ${ds} %\n🟡 Pendentes: ${bancoDeDados.pendentes.length}\n🔴 Insucessos: ${bancoDeDados.foraRota.length}\n\n♎ Justificativa:\nRota ${bancoDeDados.nomeRota}\nrodacoop | Motorista\n\n`;
   bancoDeDados.foraRota.forEach(id => msg += `${id}: Pacote de outra área\n`);
   bancoDeDados.pendentes.forEach(id => msg += `${id}: pendente\n`);
-
-  navigator.clipboard.writeText(msg).then(() => alert("Mensagem copiada para o WhatsApp!"));
+  navigator.clipboard.writeText(msg).then(() => alert("Copiado!"));
 };
 
 function atualizar() {
   const total = bancoDeDados.pendentes.length + bancoDeDados.conferidos.length;
   document.getElementById('extracted-total').innerText = bancoDeDados.pendentes.length;
   document.getElementById('verified-total').innerText = bancoDeDados.conferidos.length;
-  
   const perc = total > 0 ? (bancoDeDados.conferidos.length / total) * 100 : 0;
   document.getElementById('progress-bar').style.width = perc + "%";
-
   document.getElementById('conferidos-list').innerHTML = bancoDeDados.conferidos.map(i => `<li class="list-group-item text-success">${i}</li>`).join('');
   document.getElementById('faltantes-list').innerHTML = bancoDeDados.pendentes.map(i => `<li class="list-group-item text-danger">${i}</li>`).join('');
   document.getElementById('fora-rota-list').innerHTML = bancoDeDados.foraRota.map(i => `<li class="list-group-item text-warning">${i}</li>`).join('');
@@ -177,13 +171,7 @@ function atualizar() {
 
 function tocar(f) {
   try {
-    const c = new (window.AudioContext || window.webkitAudioContext)();
+    const c = new AudioContext();
     const o = c.createOscillator();
     o.frequency.value = f;
-    o.connect(c.destination);
-    o.start(); o.stop(c.currentTime + 0.1);
-  } catch(e) {}
-}
-</script>
-</body>
-</html>
+    o.connect(c.destination
