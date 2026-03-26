@@ -1,126 +1,90 @@
-// Variáveis de controle
-let dadosRota = {
-    unidade: "",
-    rota: "",
-    idsPendentes: [],
-    idsConferidos: [],
-    foraDeRota: []
+// --- VARIÁVEIS DE CONTROLE ---
+let bancoDeDados = {
+    pendentes: [],
+    conferidos: [],
+    foraRota: [],
+    duplicados: []
 };
 
-// --- 1. FUNÇÃO PARA PUXAR DADOS DO CÓDIGO FONTE HTML ---
+// --- 1. FUNÇÃO: EXTRAIR IDs DO HTML (FILTRO REFORÇADO) ---
 document.getElementById('extract-btn').onclick = function() {
-    const htmlBruto = document.getElementById('html-input').value;
-    if (!htmlBruto) return alert("Por favor, cole o código fonte HTML primeiro.");
+    const htmlInput = document.getElementById('html-input').value;
+    if (!htmlInput) return alert("Por favor, cole o código fonte primeiro!");
 
-    // Regex para buscar IDs (ajustado para o padrão comum de 10 a 20 dígitos)
-    const regexIDs = /\d{10,20}/g;
-    const encontrados = htmlBruto.match(regexIDs) || [];
+    // ESTA LINHA É O FILTRO: 
+    // \b\d{13,18}\b pega apenas números entre 13 e 18 dígitos isolados.
+    // Isso ignora CEPs (8), Telefones (11) e datas.
+    const regex = /\b\d{13,18}\b/g; 
+    let encontrados = htmlInput.match(regex) || [];
 
     if (encontrados.length > 0) {
-        // Remove duplicados e limpa espaços
-        dadosRota.idsPendentes = [...new Set(encontrados.map(id => id.trim()))];
+        // Remove números repetidos e limpa espaços
+        bancoDeDados.pendentes = [...new Set(encontrados.map(id => id.trim()))];
         
-        // Tenta achar o nome da rota ou unidade no meio do HTML (opcional)
-        const buscaUnidade = htmlBruto.match(/Facility:\s*([\w\s]+)/);
-        dadosRota.unidade = buscaUnidade ? buscaUnidade[1] : "Unidade Não Identificada";
-
-        iniciarInterfaceConferencia();
+        // Troca para a tela de bipagem
+        document.getElementById('initial-interface').classList.add('d-none');
+        document.getElementById('conference-interface').classList.remove('d-none');
+        
+        atualizarPainel();
+        alert(`${bancoDeDados.pendentes.length} IDs de pacotes importados! (Lixos e CEPs ignorados)`);
     } else {
-        alert("Nenhum ID de pacote foi encontrado nesse HTML. Verifique se copiou o código correto.");
+        alert("Nenhum ID válido (com mais de 13 dígitos) foi encontrado.");
     }
 };
 
-// --- 2. FUNÇÃO PARA IMPORTAR ARQUIVOS (CSV/XLSX) ---
-document.getElementById('check-csv').onclick = function() {
-    const fileInput = document.getElementById('csv-input');
-    const file = fileInput.files[0];
-
-    if (!file) return alert("Selecione um arquivo CSV ou Excel primeiro.");
-
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        const data = e.target.result;
-        // Se for Excel, usamos a biblioteca XLSX (que já está no seu HTML)
-        const workbook = XLSX.read(data, { type: 'binary' });
-        const firstSheet = workbook.SheetNames[0];
-        const rows = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet], { header: 1 });
-
-        // Extrai todos os números longos encontrados nas células do arquivo
-        let idsArquivo = [];
-        rows.forEach(row => {
-            row.forEach(cell => {
-                if (cell && cell.toString().match(/\d{10,}/)) {
-                    idsArquivo.push(cell.toString().trim());
-                }
-            });
-        });
-
-        if (idsArquivo.length > 0) {
-            dadosRota.idsPendentes = [...new Set(idsArquivo)];
-            iniciarInterfaceConferencia();
-        } else {
-            alert("Não encontramos IDs válidos dentro do arquivo.");
-        }
-    };
-    reader.readAsBinaryString(file);
-};
-
-// --- 3. LÓGICA DE CONFERÊNCIA (BIPAGEM) ---
-function iniciarInterfaceConferencia() {
-    document.getElementById('initial-interface').classList.add('d-none');
-    document.getElementById('conference-interface').classList.remove('d-none');
-    document.getElementById('destination-facility-title').innerText = dadosRota.unidade;
-    atualizarTelas();
-}
-
+// --- 2. FUNÇÃO: BIPAGEM (CÓDIGO DE BARRAS) ---
 document.getElementById('barcode-input').addEventListener('keypress', function(e) {
     if (e.key === 'Enter') {
-        const idBipado = this.value.trim();
-        if (!idBipado) return;
+        const id = this.value.trim();
+        if (!id) return;
 
-        if (dadosRota.idsPendentes.includes(idBipado)) {
-            // Sucesso: estava pendente
-            dadosRota.idsPendentes = dadosRota.idsPendentes.filter(id => id !== idBipado);
-            dadosRota.idsConferidos.push(idBipado);
-            emitirSom(880); // Som agudo (sucesso)
-        } else if (dadosRota.idsConferidos.includes(idBipado)) {
-            alert("Este pacote já foi bipado!");
+        if (bancoDeDados.pendentes.includes(id)) {
+            bancoDeDados.pendentes = bancoDeDados.pendentes.filter(p => p !== id);
+            bancoDeDados.conferidos.push(id);
+            tocarSom(true);
+        } else if (bancoDeDados.conferidos.includes(id)) {
+            bancoDeDados.duplicados.push(id);
+            alert("Pacote já bipado anteriormente!");
         } else {
-            // Fora de rota
-            dadosRota.foraDeRota.push(idBipado);
-            emitirSom(220); // Som grave (erro)
+            bancoDeDados.foraRota.push(id);
+            tocarSom(false);
         }
 
-        this.value = ""; // Limpa campo
-        atualizarTelas();
+        this.value = ""; 
+        atualizarPainel();
     }
 });
 
-// --- 4. ATUALIZAÇÃO VISUAL ---
-function atualizarTelas() {
-    document.getElementById('extracted-total').innerText = dadosRota.idsPendentes.length + dadosRota.idsConferidos.length;
-    document.getElementById('verified-total').innerText = dadosRota.idsConferidos.length;
+// --- 3. ATUALIZAÇÃO VISUAL ---
+function atualizarPainel() {
+    const total = bancoDeDados.pendentes.length + bancoDeDados.conferidos.length;
+    document.getElementById('extracted-total').innerText = total;
+    document.getElementById('verified-total').innerText = bancoDeDados.conferidos.length;
 
-    // Listas HTML
-    document.getElementById('conferidos-list').innerHTML = dadosRota.idsConferidos.map(id => `<li class="list-group-item list-group-item-success">${id}</li>`).join('');
-    document.getElementById('faltantes-list').innerHTML = dadosRota.idsPendentes.map(id => `<li class="list-group-item list-group-item-danger">${id}</li>`).join('');
-    document.getElementById('fora-rota-list').innerHTML = dadosRota.foraDeRota.map(id => `<li class="list-group-item list-group-item-warning">${id}</li>`).join('');
+    const porc = (bancoDeDados.conferidos.length / total) * 100 || 0;
+    document.getElementById('progress-bar').style.width = porc + "%";
 
-    // Barra de progresso
-    const total = dadosRota.idsPendentes.length + dadosRota.idsConferidos.length;
-    const progresso = (dadosRota.idsConferidos.length / total) * 100 || 0;
-    document.getElementById('progress-bar').style.width = progresso + "%";
+    document.getElementById('conferidos-list').innerHTML = bancoDeDados.conferidos.map(p => `<li class="list-group-item list-group-item-success">${p}</li>`).join('');
+    document.getElementById('faltantes-list').innerHTML = bancoDeDados.pendentes.map(p => `<li class="list-group-item list-group-item-danger">${p}</li>`).join('');
+    document.getElementById('fora-rota-list').innerHTML = bancoDeDados.foraRota.map(p => `<li class="list-group-item list-group-item-warning">${p}</li>`).join('');
+    document.getElementById('duplicados-list').innerHTML = bancoDeDados.duplicados.map(p => `<li class="list-group-item list-group-item-secondary">${p}</li>`).join('');
 }
 
-// --- 5. SONS E UTILITÁRIOS ---
-function emitirSom(freq) {
+// --- 4. GERAR MENSAGEM ---
+document.getElementById('generate-message').onclick = function() {
+    const msg = `*RESUMO CONFERÊNCIA*\n\n✅ Recebidos: ${bancoDeDados.conferidos.length}\n❌ Pendentes: ${bancoDeDados.pendentes.length}\n⚠️ Fora de Rota: ${bancoDeDados.foraRota.length}\n\n*IDs Pendentes:*\n${bancoDeDados.pendentes.join('\n')}`;
+    const area = document.getElementById('mensagem-final');
+    area.value = msg;
+    area.classList.remove('d-none');
+};
+
+function tocarSom(sucesso) {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
     const osc = ctx.createOscillator();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    osc.frequency.setValueAtTime(sucesso ? 880 : 300, ctx.currentTime);
     osc.connect(ctx.destination);
     osc.start();
-    osc.stop(ctx.currentTime + 0.1);
+    osc.stop(ctx.currentTime + 0.15);
 }
 
 document.getElementById('back-btn').onclick = () => location.reload();
