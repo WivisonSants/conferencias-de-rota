@@ -4,152 +4,210 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Conferência de Rota | Rodacoop</title>
+    
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://onildopr.github.io/rodacoop.ui/css/rodacoop.css">
+    
     <style>
-        body { background-color: #f4f7f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .list-section { height: 300px; overflow-y: auto; background: #fff; border: 1px solid #dee2e6; border-radius: 4px; padding: 0; }
-        .list-group-item { padding: 5px 8px; font-family: monospace; font-size: 11px; border-bottom: 1px solid #eee !important; }
-        .motivo-tag { font-size: 9px; color: #d9534f; display: block; font-weight: bold; text-transform: uppercase; }
-        #barcode-input { font-weight: bold; font-size: 1.5rem; border: 3px solid #ff6a00; height: 55px; text-align: center; }
-        .btn-orange { background-color: #ff6a00; color: #fff; font-weight: bold; }
-        .btn-black { background-color: #000; color: #fff; font-weight: bold; }
-        #whatsapp-preview { font-family: monospace; font-size: 12px; background-color: #f8f9fa; border: 1px solid #ccc; color: #333; resize: none; }
+        body { background-color: #f4f7f6; font-family: 'Proxima Nova', sans-serif; }
+        .rk-scope .brand-title { color: #333; font-weight: 700; text-transform: uppercase; }
+        
+        /* Ajuste das listas para caberem 4 colunas */
+        .list-section { height: 300px; overflow-y: auto; background: #fff; border: 1px solid #ddd; border-radius: 4px; padding: 0; list-style: none; }
+        .list-group-item { padding: 4px 8px; font-family: monospace; font-size: 11px; border-bottom: 1px solid #eee !important; margin: 0; }
+        .motivo-insucesso { font-size: 9px; color: #e74c3c; display: block; font-weight: bold; line-height: 1; margin-top: 2px; }
+        
+        /* Botões Estilo Rodacoop */
+        #barcode-input { font-weight: bold; font-size: 1.5rem; border: 3px solid #ff6a00; height: 60px; text-align: center; color: #ff6a00; border-radius: 8px; }
+        .btn-orange { background-color: #ff6a00; color: white; font-weight: bold; border: none; height: 45px; }
+        .btn-black { background-color: #000; color: white; font-weight: bold; border: none; height: 45px; }
+        .btn-success-lg { background-color: #28a745; color: white; font-weight: bold; height: 60px; font-size: 18px; border: none; border-radius: 8px; }
+        
+        #whatsapp-preview { font-family: monospace; font-size: 12px; background-color: #fff; border: 1px solid #ced4da; color: #333; resize: none; border-radius: 4px; }
+        .card { border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: none; }
     </style>
 </head>
 <body class="rk-scope">
 
-<div class="container pt-3">
-    <div id="setup-view">
-        <div class="text-center mb-3">
-            <h2 class="brand-title">Conferência de Rota</h2>
-            <p class="text-muted">Filtro de Precisão - 88 Pacotes</p>
-        </div>
-        <div class="card brand-card mb-3">
-            <div class="card-body">
-                <label class="font-weight-bold">Importar Código Fonte (Ctrl+U):</label>
-                <textarea id="html-input" class="form-control mb-3" rows="5" placeholder="Cole o código aqui..."></textarea>
-                <button id="import-btn" class="btn btn-primary btn-block btn-lg">ANALISAR ROTA</button>
-            </div>
-        </div>
-        <button class="btn btn-black btn-block">FECHAMENTO DIÁRIO</button>
-    </div>
-
-    <div id="work-view" class="d-none">
-        <div class="text-center mb-2">
-            <h3 id="route-name-ui" class="text-orange font-weight-bold">---</h3>
-            <span id="driver-ui" class="badge badge-dark p-2">Motorista: ---</span>
-        </div>
-
-        <div class="card mb-3 shadow-sm">
-            <div class="card-body py-2">
-                <div class="row text-center">
-                    <div class="col-4 border-right"><h6>PENDENTES</h6><b id="ui-pending" class="h4">0</b></div>
-                    <div class="col-4 border-right"><h6>ENTREGUES</h6><b id="ui-done" class="h4 text-success">0</b></div>
-                    <div class="col-4"><h6>ERROS</h6><b id="ui-fail" class="h4 text-danger">0</b></div>
+<div class="container pt-4">
+    <div class="row">
+        <div class="col-lg-10 offset-lg-1">
+            
+            <div id="setup-view">
+                <div class="text-center mb-4">
+                    <h2 class="brand-title">Conferência de Rota</h2>
+                    <div class="brand-subtle">IDs PENDENTES / INSUCESSOS</div>
                 </div>
-                <div class="progress mt-2"><div id="ui-bar" class="progress-bar" style="width:0%"></div></div>
+
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="brand-title" style="font-size:16px;">Rotas salvas</h5>
+                        <div class="row no-gutters">
+                            <div class="col-8 pr-2">
+                                <select id="saved-routes" class="form-control"><option value="">(Nenhuma selecionada)</option></select>
+                            </div>
+                            <div class="col-4">
+                                <button class="btn btn-orange btn-block">Carregar</button>
+                            </div>
+                        </div>
+                        <button class="btn btn-black btn-block mt-3">FECHAMENTO DIÁRIO</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="brand-title" style="font-size:16px;">Importar do HTML (Ctrl+U)</h5>
+                        <textarea id="html-input" class="form-control mb-3" rows="6" placeholder="Cole o código fonte da página aqui..."></textarea>
+                        <button id="import-btn" class="btn btn-primary btn-lg btn-block font-weight-bold">Importar/Salvar Rotas do HTML</button>
+                    </div>
+                </div>
             </div>
-        </div>
 
-        <input type="text" id="barcode-input" class="form-control mb-3" placeholder="BIPE O PACOTE" autofocus autocomplete="off">
+            <div id="work-view" class="d-none">
+                <div class="text-center mb-3">
+                    <h2 id="ui-route-id" class="brand-title" style="color:#ff6a00; font-size: 28px;">---</h2>
+                    <h5 id="ui-driver" class="brand-subtle">Motorista: ---</h5>
+                </div>
 
-        <div class="row no-gutters mb-3">
-            <div class="col-4 px-1 text-center"><h6>OK</h6><ul id="l-ok" class="list-section"></ul></div>
-            <div class="col-4 px-1 text-center"><h6>Pendentes</h6><ul id="l-pending" class="list-section"></ul></div>
-            <div class="col-4 px-1 text-center"><h6>Insucessos</h6><ul id="l-fail" class="list-section"></ul></div>
-        </div>
+                <div class="card mb-3 text-center">
+                    <div class="card-body py-2">
+                        <div class="row">
+                            <div class="col-4 border-right">
+                                <div class="small text-muted font-weight-bold">PENDENTES</div>
+                                <strong id="count-p" style="font-size: 30px;">0</strong>
+                            </div>
+                            <div class="col-4 border-right">
+                                <div class="small text-muted font-weight-bold text-success">RECEBIDOS</div>
+                                <strong id="count-ok" style="font-size: 30px;" class="text-success">0</strong>
+                            </div>
+                            <div class="col-4">
+                                <div class="small text-muted font-weight-bold text-danger">FALHAS</div>
+                                <strong id="count-fail" style="font-size: 30px;" class="text-danger">0</strong>
+                            </div>
+                        </div>
+                        <div class="progress mt-2"><div id="ui-bar" class="progress-bar progress-bar-striped bg-warning" style="width: 0%"></div></div>
+                    </div>
+                </div>
 
-        <div class="card mb-3">
-            <div class="card-body p-2">
-                <label class="small font-weight-bold">RELATÓRIO WHATSAPP:</label>
-                <textarea id="whatsapp-preview" class="form-control" rows="8" readonly></textarea>
+                <input type="text" id="barcode-input" class="form-control mb-4" placeholder="BIPE O PACOTE AQUI" autofocus autocomplete="off">
+
+                <div class="row text-center no-gutters mb-4">
+                    <div class="col-3 px-1"><h6>OK</h6><ul id="list-ok" class="list-section"></ul></div>
+                    <div class="col-3 px-1"><h6>Pendente</h6><ul id="list-pending" class="list-section"></ul></div>
+                    <div class="col-3 px-1"><h6>Insucesso</h6><ul id="list-fail" class="list-section"></ul></div>
+                    <div class="col-3 px-1"><h6>Fora</h6><ul id="list-out" class="list-section"></ul></div>
+                </div>
+
+                <div class="card mb-3">
+                    <div class="card-body p-2">
+                        <label class="small font-weight-bold text-primary">RELATÓRIO PARA WHATSAPP:</label>
+                        <textarea id="whatsapp-preview" class="form-control" rows="6" readonly></textarea>
+                    </div>
+                </div>
+
+                <button id="copy-btn" class="btn btn-success-lg btn-block">COPIAR MENSAGEM WHATSAPP</button>
+                <button onclick="location.reload()" class="btn btn-link btn-block text-muted">Sair da Rota</button>
             </div>
+
         </div>
-        <button id="copy-btn" class="btn btn-success btn-block btn-lg font-weight-bold mb-4">COPIAR RELATÓRIO</button>
     </div>
 </div>
 
 <script>
-let data = { id: "", nome: "", motorista: "", orh: "00:00", p: [], ok: [], fail: [] };
+let app = { id: "", nome: "", motorista: "", orh: "00:00", pendentes: [], entregues: [], falhas: [], fora: [] };
 
 document.getElementById('import-btn').onclick = function() {
-    const html = document.getElementById('html-input').value;
-    if(!html) return;
+    const raw = document.getElementById('html-input').value;
+    if(!raw) return alert("Cole o código!");
 
-    // 1. Captura ID da Rota e Nome
-    data.id = (html.match(/detail\/(\d+)/) || ["","---"])[1];
-    data.nome = (html.match(/<title[^>]*>.*?\|\s*([^<|]+)/i) || ["","Rota"])[1].trim();
+    // 1. Metadados (Nome, ID, Motorista, Tempo)
+    app.id = (raw.match(/detail\/(\d+)/) || ["", "---"])[1];
+    app.nome = (raw.match(/<title[^>]*>.*?\|\s*([^<|]+)/i) || ["", "Rota Local"])[1].trim();
+    app.motorista = (raw.match(/"driver_name":"(.*?)"/) || ["", "Não informado"])[1];
+    app.orh = (raw.match(/"duration":"(.*?)"/) || ["", "00:00"])[1];
 
-    // 2. Captura Motorista e Tempo de Rota (ORH)
-    data.motorista = (html.match(/"driver_name":"(.*?)"/) || ["","Desconhecido"])[1];
-    data.orh = (html.match(/"duration":"(.*?)"/) || ["","00:00"])[1];
-
-    // 3. CAPTURA DE PACOTES (Apenas dentro do array "shipments")
-    // Isso evita pegar os 165 números de sistema e foca apenas nos IDs de pacotes
-    const shipmentsBlock = html.match(/"shipments":\[(.*?)\]/);
-    if(shipmentsBlock) {
+    // 2. CAPTURA BLINDADA (Busca apenas dentro da lista de remessas do JSON)
+    const block = raw.match(/"shipments":\[(.*?)\]/);
+    if(block) {
         const regex = /"id":(\d{11}),.*?"status":"(.*?)"(?:.*?"substatus":"(.*?)")?/g;
         let m;
-        data.p = []; data.ok = []; data.fail = [];
-
-        while ((m = regex.exec(shipmentsBlock[1])) !== null) {
-            let item = { id: m[1], motivo: (m[3] || "Sem motivo").replace(/_/g, ' ') };
-            if (m[2] === 'delivered') data.ok.push(item);
-            else if (m[2] === 'not_delivered' || m[2] === 'cancelled') data.fail.push(item);
-            else data.p.push(item);
+        app.pendentes = []; app.entregues = []; app.falhas = [];
+        
+        while ((m = regex.exec(block[1])) !== null) {
+            let item = { id: m[1], motivo: (m[3] || "").replace(/_/g, ' ') };
+            if (m[2] === 'delivered') app.entregues.push(item);
+            else if (m[2] === 'not_delivered' || m[2] === 'cancelled') app.falhas.push(item);
+            else app.pendentes.push(item);
         }
     }
 
-    if(data.p.length + data.ok.length + data.fail.length > 0) {
-        document.getElementById('route-name-ui').innerText = "Rota: " + data.id;
-        document.getElementById('driver-ui').innerText = "Motorista: " + data.motorista;
+    if(app.pendentes.length + app.entregues.length + app.falhas.length > 0) {
+        document.getElementById('ui-route-id').innerText = "Rota: " + app.id;
+        document.getElementById('ui-driver').innerText = "Motorista: " + app.motorista;
         document.getElementById('setup-view').classList.add('d-none');
         document.getElementById('work-view').classList.remove('d-none');
-        update();
-    } else { alert("Nenhum pacote real encontrado. Use Ctrl+U na página da rota."); }
+        render();
+        setTimeout(() => document.getElementById('barcode-input').focus(), 500);
+    } else { alert("Erro: Não encontramos os 88 pacotes. Certifique-se de usar Ctrl+U na página correta."); }
 };
 
 document.getElementById('barcode-input').onkeypress = function(e) {
     if (e.key === 'Enter') {
         const val = this.value.trim();
-        let idx = data.p.findIndex(x => x.id === val);
-        if (idx !== -1) {
-            data.ok.unshift(data.p.splice(idx, 1)[0]);
-            new AudioContext().oscillatorStart(); // Sinal sonoro simplificado
+        if(!val) return;
+
+        let pIdx = app.pendentes.findIndex(x => x.id === val);
+        if (pIdx !== -1) {
+            app.entregues.unshift(app.pendentes.splice(pIdx, 1)[0]);
+            beep(880);
+        } else if (app.entregues.some(x => x.id === val)) {
+            alert("Já bipado!");
+        } else {
+            if(!app.fora.includes(val)) app.fora.unshift(val);
+            beep(350);
         }
-        this.value = ""; update();
+        this.value = ""; render();
     }
 };
 
-function update() {
-    document.getElementById('ui-pending').innerText = data.p.length;
-    document.getElementById('ui-done').innerText = data.ok.length;
-    document.getElementById('ui-fail').innerText = data.fail.length;
-    
-    let total = data.p.length + data.ok.length;
-    document.getElementById('ui-bar').style.width = (total > 0 ? (data.ok.length/total*100) : 0) + "%";
+function render() {
+    document.getElementById('count-p').innerText = app.pendentes.length;
+    document.getElementById('count-ok').innerText = app.entregues.length;
+    document.getElementById('count-fail').innerText = app.falhas.length;
 
-    document.getElementById('l-ok').innerHTML = data.ok.map(x => `<li class="list-group-item text-success">✅ ${x.id}</li>`).join('');
-    document.getElementById('l-pending').innerHTML = data.p.map(x => `<li class="list-group-item text-danger">❌ ${x.id}</li>`).join('');
-    document.getElementById('l-fail').innerHTML = data.fail.map(x => `<li class="list-group-item text-warning">⚠️ ${x.id}<span class="motivo-tag">${x.motivo}</span></li>`).join('');
+    const total = app.pendentes.length + app.entregues.length + app.falhas.length;
+    const ds = total > 0 ? ((app.entregues.length / total) * 100).toFixed(1) : "0.0";
+    document.getElementById('ui-bar').style.width = ds + "%";
 
-    // RELATÓRIO FORMATADO
-    const perc = ((data.ok.length / (data.p.length + data.ok.length + data.fail.length)) * 100).toFixed(1);
-    let msg = `↩ RTS - Rota: ${data.id}\n🏭 SVC/XPT: EMN1 - Imperatriz\n🕗 ORH: ${data.orh}\n🟢 %DS: ${perc}%\n🟡 Pendentes: ${data.p.length}\n🔴 Insucessos: ${data.fail.length}\n\n♎ Justificativa:\nRota ${data.nome}\nMotorista: ${data.motorista}\n\n`;
+    document.getElementById('list-ok').innerHTML = app.entregues.map(x => `<li class="list-group-item text-success">✅ ${x.id}</li>`).join('');
+    document.getElementById('list-pending').innerHTML = app.pendentes.map(x => `<li class="list-group-item text-danger">❌ ${x.id}</li>`).join('');
+    document.getElementById('list-fail').innerHTML = app.falhas.map(x => `<li class="list-group-item text-warning">⚠️ ${x.id}<span class="motivo-insucesso">${x.motivo}</span></li>`).join('');
+    document.getElementById('list-out').innerHTML = app.fora.map(x => `<li class="list-group-item text-dark">📦 ${x}</li>`).join('');
+
+    // Monta Relatório
+    const hora = new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+    let msg = `↩ RTS - Rota: ${app.id}\n🏭 SVC/XPT: EMN1 - Imperatriz\n🕗 ORH: ${app.orh} h\n🟢 %DS: ${ds} %\n🟡 Pendentes: ${app.pendentes.length}\n🔴 Insucessos: ${app.falhas.length}\n\n♎ Justificativa:\nRota ${app.nome}\nMotorista: ${app.motorista}\nrodacoop | Conferência\n`;
     
-    if(data.fail.length > 0) {
-        msg += `*MOTIVOS DE INSUCESSO:*\n`;
-        data.fail.forEach(f => msg += `- ${f.id}: ${f.motivo}\n`);
+    if(app.falhas.length > 0) {
+        msg += `\n*DETALHE INSUCESSOS:*\n`;
+        app.falhas.forEach(f => msg += `- ${f.id}: ${f.motivo}\n`);
     }
     document.getElementById('whatsapp-preview').value = msg;
 }
 
 document.getElementById('copy-btn').onclick = function() {
     navigator.clipboard.writeText(document.getElementById('whatsapp-preview').value);
-    this.innerText = "✅ RELATÓRIO COPIADO!";
-    setTimeout(() => this.innerText = "COPIAR RELATÓRIO", 2000);
+    this.innerText = "✅ COPIADO!";
+    setTimeout(() => this.innerText = "COPIAR MENSAGEM WHATSAPP", 2000);
 };
+
+function beep(f) {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    osc.frequency.value = f;
+    osc.connect(ctx.destination);
+    osc.start(); osc.stop(ctx.currentTime + 0.1);
+}
 </script>
 </body>
 </html>
