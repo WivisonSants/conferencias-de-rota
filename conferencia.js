@@ -1,4 +1,3 @@
-// --- BANCO DE DADOS LOCAL ---
 let bancoDeDados = {
     pendentes: [],
     conferidos: [],
@@ -7,27 +6,27 @@ let bancoDeDados = {
     nomeRota: ""
 };
 
-// --- 1. EXTRAIR IDs E DADOS DA ROTA ---
+// --- EXTRAÇÃO ---
 document.getElementById('extract-btn').onclick = function() {
     const htmlInput = document.getElementById('html-input').value;
-    if (!htmlInput) return alert("Cole o HTML primeiro!");
+    if (!htmlInput) return alert("Por favor, cole o HTML!");
 
     const parser = new DOMParser();
     const doc = parser.parseFromString(htmlInput, 'text/html');
 
-    // Captura ID da Rota (Link) e Nome (Título)
+    // Captura dados da rota
     const rotaMatch = htmlInput.match(/detail\/(\d+)/);
     bancoDeDados.idRota = rotaMatch ? rotaMatch[1] : "Não identificado";
     
     const titulo = doc.querySelector('title')?.innerText || "";
-    bancoDeDados.nomeRota = titulo.includes('|') ? titulo.split('|')[1].trim() : "Rota";
+    bancoDeDados.nomeRota = titulo.includes('|') ? titulo.split('|')[1].trim() : "Filtro";
 
-    // Busca IDs de 11 dígitos (Filtro que resolvemos)
+    // Filtro de IDs de 11 dígitos
     let encontrados = [];
-    const nos = doc.querySelectorAll('a, td, span, div, p');
-    nos.forEach(el => {
-        const texto = el.innerText.trim();
-        if (/^\d{11}$/.test(texto)) encontrados.push(texto);
+    const elementos = doc.querySelectorAll('a, td, span, div, p');
+    elementos.forEach(el => {
+        const txt = el.innerText.trim();
+        if (/^\d{11}$/.test(txt)) encontrados.push(txt);
         
         const href = el.getAttribute('href') || '';
         const matchHref = href.match(/\d{11}/);
@@ -43,11 +42,11 @@ document.getElementById('extract-btn').onclick = function() {
         document.getElementById('conference-interface').classList.remove('d-none');
         atualizarPainel();
     } else {
-        alert("Nenhum ID de 11 dígitos encontrado no HTML.");
+        alert("Nenhum pacote encontrado. Verifique se o HTML está correto.");
     }
 };
 
-// --- 2. LÓGICA DE BIPAGEM ---
+// --- BIPAGEM ---
 document.getElementById('barcode-input').addEventListener('keypress', function(e) {
     if (e.key === 'Enter') {
         const id = this.value.trim();
@@ -56,10 +55,12 @@ document.getElementById('barcode-input').addEventListener('keypress', function(e
         if (bancoDeDados.pendentes.includes(id)) {
             bancoDeDados.pendentes = bancoDeDados.pendentes.filter(p => p !== id);
             bancoDeDados.conferidos.push(id);
-            tocarSom(880); // Som Agudo (Sucesso)
+            tocarSom(880);
         } else if (!bancoDeDados.conferidos.includes(id)) {
-            bancoDeDados.foraRota.push(id);
-            tocarSom(300); // Som Grave (Erro/Fora de Rota)
+            if (!bancoDeDados.foraRota.includes(id)) {
+                bancoDeDados.foraRota.push(id);
+                tocarSom(300);
+            }
         }
 
         this.value = ""; 
@@ -67,15 +68,14 @@ document.getElementById('barcode-input').addEventListener('keypress', function(e
     }
 });
 
-// --- 3. GERADOR DE RELATÓRIO WHATSAPP ---
+// --- RELATÓRIO ---
 document.getElementById('generate-report-btn').onclick = function() {
     const agora = new Date();
     const hora = agora.getHours().toString().padStart(2, '0');
     const min = agora.getMinutes().toString().padStart(2, '0');
     
     const total = bancoDeDados.pendentes.length + bancoDeDados.conferidos.length;
-    const entregues = bancoDeDados.conferidos.length;
-    const ds = total > 0 ? ((entregues / total) * 100).toFixed(1) : "0.0";
+    const ds = total > 0 ? ((bancoDeDados.conferidos.length / total) * 100).toFixed(1) : "0.0";
 
     let msg = `↩ RTS - Rota: ${bancoDeDados.idRota}\n`;
     msg += `🏭 SVC/XPT: EMN1 - Imperatriz\n`;
@@ -88,22 +88,13 @@ document.getElementById('generate-report-btn').onclick = function() {
     msg += `Rota ${bancoDeDados.nomeRota}\n`;
     msg += `rodacoop | Motorista\n\n`;
 
-    // Adiciona IDs de Insucesso
-    bancoDeDados.foraRota.forEach(id => {
-        msg += `${id}: Pacote de outra área\n`;
-    });
+    bancoDeDados.foraRota.forEach(id => msg += `${id}: Pacote de outra área\n`);
+    bancoDeDados.pendentes.forEach(id => msg += `${id}: pendente\n`);
 
-    // Adiciona IDs Pendentes
-    bancoDeDados.pendentes.forEach(id => {
-        msg += `${id}: pendente\n`;
-    });
-
-    navigator.clipboard.writeText(msg).then(() => {
-        alert("Relatório copiado! Agora cole no WhatsApp.");
-    });
+    navigator.clipboard.writeText(msg).then(() => alert("Relatório copiado para o WhatsApp!"));
 };
 
-// --- FUNÇÕES DE APOIO ---
+// --- AUXILIARES ---
 function atualizarPainel() {
     document.getElementById('extracted-total').innerText = bancoDeDados.pendentes.length + bancoDeDados.conferidos.length;
     document.getElementById('verified-total').innerText = bancoDeDados.conferidos.length;
