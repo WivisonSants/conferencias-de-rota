@@ -1,104 +1,79 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Conferência de Rota - IDs Pendentes</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://onildopr.github.io/rodacoop.ui/css/rodacoop.css">
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <title>Conferência de Rota - EMN1</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f4f7f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .container { max-width: 800px; margin-top: 30px; }
+        .card { border: none; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        #conferidos-list, #faltantes-list { max-height: 200px; overflow-y: auto; }
+        .stat-box { text-align: center; padding: 15px; border-radius: 10px; color: white; }
+        .bg-pendente { background-color: #e74c3c; }
+        .bg-conferido { background-color: #2ecc71; }
+        .bg-total { background-color: #3498db; }
+    </style>
 </head>
-<body class="rk-scope">
+<body>
 
-<div class="container pt-4" id="html">
-    <div class="row">
-        <div class="col-sm-2"></div>
-        <div class="col-sm-8">
-            
-            <div id="initial-interface">
-                <div class="text-center mb-3">
-                    <h2 class="brand-title">Conferência de Rota</h2>
-                    <div class="brand-subtle">IDs pendentes / insucessos</div>
-                </div>
-
-                <div class="card mb-3 brand-card">
-                    <div class="card-body">
-                        <h5 class="mb-2 brand-title" style="font-size:16px;">Rotas salvas</h5>
-                        <div class="row">
-                            <div class="col-md-8">
-                                <select id="saved-routes" class="form-control">
-                                    <option value="">(Nenhuma selecionada)</option>
-                                </select>
-                            </div>
-                            <div class="col-md-4 mt-2 mt-md-0">
-                                <button id="load-route" class="btn btn-orange btn-block">Carregar rota</button>
-                            </div>
-                        </div>
-                        <div class="row mt-2">
-                            <div class="col-md-6">
-                                <button id="delete-route" class="btn btn-outline-danger btn-block">Excluir rota</button>
-                            </div>
-                            <div class="col-md-6 mt-2 mt-md-0">
-                                <button id="clear-all-routes" class="btn btn-outline-secondary btn-block">Limpar todas</button>
-                            </div>
-                        </div>
-                        <div class="row mt-2">
-                            <div class="col-md-12">
-                                <button id="fechamento-btn" class="btn btn-black btn-block">FECHAMENTO DIÁRIO</button>
-                            </div>
-                        </div>
-                        <small class="text-muted d-block mt-2">Cole o HTML e clique em “Importar”.</small>
-                    </div>
-                </div>
-
-                <textarea id="html-input" class="form-control mb-3" rows="8" placeholder="Insira o HTML bruto"></textarea>
-                <div class="text-center">
-                    <button id="extract-btn" class="btn btn-primary mb-2">Importar/Salvar Rotas do HTML</button>
-                    <button id="manual-btn" class="btn btn-secondary">Adicionar IDs Manualmente</button>
-                </div>
-            </div>
-
-            <div id="conference-interface" class="d-none">
-                <div class="text-center mb-3">
-                    <h2 id='destination-facility-title' class="brand-title"></h2>
-                    <h2 id='destination-facility-name' class="brand-subtle" style="font-size:16px;"></h2>
-                </div>
-                
-                <div class="my-2">
-                    <div>Pacotes pendentes: <strong><span id="extracted-total">0</span></strong></div>
-                    <div>Pacotes Recebidos: <strong><span id="verified-total">0</span></strong></div>
-                    <div class="progress my-2">
-                        <div id="progress-bar" class="progress-bar" role="progressbar" style="width: 0%"></div>
-                    </div>
-                </div>
-
-                <input type="text" id="barcode-input" class="form-control" placeholder="Leia o código de barras" autofocus>
-
-                <div class="row text-center mt-4">
-                    <div class="col-md-3"><h5>Recebidos</h5><ul id="conferidos-list" class="list-group list-section"></ul></div>
-                    <div class="col-md-3"><h5>Pendentes</h5><ul id="faltantes-list" class="list-group list-section"></ul></div>
-                    <div class="col-md-3"><h5>Fora Rota</h5><ul id="fora-rota-list" class="list-group list-section"></ul></div>
-                    <div class="col-md-3"><h5>Duplicados</h5><ul id="duplicados-list" class="list-group list-section"></ul></div>
-                </div>
-
-                <div class="text-center my-3">
-                    <input type="file" id="csv-input" accept=".csv" class="form-control mb-2">
-                    <button id="check-csv" class="btn btn-info mb-2">Checar CSV</button><br>
-                    <button id="back-btn" class="btn btn-secondary">Voltar</button>
-                    <button id="generate-message" class="btn btn-success">Gerar Mensagem</button>
-                </div>
-                <textarea id="mensagem-final" class="form-control mt-3 d-none" rows="10"></textarea>
-            </div>
-
+<div class="container">
+    <div id="initial-interface" class="card p-4">
+        <h2 class="text-center mb-4">📦 Importar Rota</h2>
+        <div class="mb-3">
+            <label class="form-label">Cole o HTML da Rota (Ctrl+U e Ctrl+A na página do AdminML):</label>
+            <textarea id="html-input" class="form-control" rows="8" placeholder="Cole aqui..."></textarea>
         </div>
-        <div class="col-sm-2"></div>
+        <button id="extract-btn" class="btn btn-primary btn-lg w-100">Iniciar Conferência 🚀</button>
+    </div>
+
+    <div id="conference-interface" class="card p-4 d-none">
+        <h3 class="text-center mb-3">Bipagem em Curso</h3>
+        
+        <div class="row mb-3 g-2">
+            <div class="col-4">
+                <div class="stat-box bg-total">
+                    <small>Total</small><br><strong id="extracted-total">0</strong>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="stat-box bg-conferido">
+                    <small>Bipados</small><br><strong id="verified-total">0</strong>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="stat-box bg-pendente">
+                    <small>Faltam</small><br><strong id="faltantes-total">0</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <input type="text" id="barcode-input" class="form-control form-control-lg text-center" placeholder="Bipe o código de barras aqui" autofocus>
+        </div>
+
+        <div class="row">
+            <div class="col-6">
+                <h6>✅ Conferidos</h6>
+                <ul id="conferidos-list" class="list-group"></ul>
+            </div>
+            <div class="col-6">
+                <h6>❌ Faltantes</h6>
+                <ul id="faltantes-list" class="list-group"></ul>
+            </div>
+        </div>
+
+        <hr>
+
+        <button id="generate-report-btn" class="btn btn-success btn-lg w-100 mb-2">
+            Copiar Relatório WhatsApp 📱
+        </button>
+        
+        <button id="back-btn" class="btn btn-outline-secondary w-100">Reiniciar / Nova Rota</button>
     </div>
 </div>
 
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
 <script src="conferencia.js"></script>
-
 </body>
 </html>
