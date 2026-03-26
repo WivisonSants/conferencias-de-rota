@@ -1,180 +1,225 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Conferência de Rota | Rodacoop</title>
-  
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
-  <link rel="stylesheet" href="https://onildopr.github.io/rodacoop.ui/css/rodacoop.css">
-  
-  <style>
-    body { background-color: #f4f7f6; }
-    .list-section { height: 350px; overflow-y: auto; background: #fff; border: 1px solid #ddd; border-radius: 5px; padding: 0; list-style: none; }
-    .list-group-item { padding: 5px 10px; font-family: monospace; font-size: 14px; border-bottom: 1px solid #eee !important; margin: 0; }
-    #barcode-input { font-weight: bold; font-size: 1.5rem; border: 2px solid #ff6a00; height: 60px; text-align: center; color: #ff6a00; }
-    .btn-orange { background-color: #ff6a00; color: white; font-weight: bold; border: none; }
-    .btn-black { background-color: #000; color: white; font-weight: bold; border: none; }
-    .progress-bar { background-color: #ff6a00; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conferência de Rota | Rodacoop</title>
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://onildopr.github.io/rodacoop.ui/css/rodacoop.css">
+    
+    <style>
+        body { background-color: #f4f7f6; font-family: 'Proxima Nova', sans-serif; }
+        
+        /* Ajustes de Layout para ficar igual ao Onildo */
+        .list-section { 
+            height: 320px; 
+            overflow-y: auto; 
+            background: #fff; 
+            border: 1px solid #dee2e6; 
+            border-radius: 4px; 
+            padding: 0; 
+            list-style: none;
+        }
+        .list-group-item { 
+            padding: 6px 10px; 
+            font-family: 'Courier New', monospace; 
+            font-size: 13px; 
+            border-bottom: 1px solid #f1f1f1 !important; 
+            margin: 0; 
+        }
+        
+        /* Botões e Inputs com design Rodacoop */
+        #barcode-input { 
+            font-weight: bold; 
+            font-size: 1.4rem; 
+            border: 3px solid #ff6a00; 
+            height: 60px; 
+            text-align: center; 
+            color: #333;
+            border-radius: 8px;
+        }
+        
+        .btn-orange { background-color: #ff6a00; color: white; font-weight: bold; border-radius: 6px; border: none; }
+        .btn-orange:hover { background-color: #e65f00; color: white; }
+        
+        .btn-black { background-color: #000; color: white; font-weight: bold; border-radius: 6px; border: none; }
+        .btn-black:hover { background-color: #333; color: white; }
+        
+        .brand-card { 
+            border: none; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08); 
+            border-radius: 10px; 
+        }
+
+        /* Cores da Barra de Progresso */
+        .progress { height: 18px; border-radius: 10px; background-color: #e9ecef; }
+        .progress-bar { background-color: #ff6a00; }
+        
+        h2.brand-title { font-size: 24px; margin-bottom: 5px; }
+        .brand-subtle { font-size: 14px; color: #666; margin-bottom: 20px; }
+    </style>
 </head>
 <body class="rk-scope">
 
 <div class="container pt-4">
-  <div class="row">
-    <div class="col-lg-8 offset-lg-2">
-      
-      <div id="setup-view">
-        <div class="text-center mb-4">
-          <h2 class="brand-title">Conferência de Rota</h2>
-          <div class="brand-subtle">FILTRAGEM POR SHIPMENT_ID</div>
-        </div>
+    <div class="row">
+        <div class="col-md-10 offset-md-1 col-lg-8 offset-lg-2">
+            
+            <div id="setup-view">
+                <div class="text-center">
+                    <h2 class="brand-title">Conferência de Rota</h2>
+                    <div class="brand-subtle">IDs PENDENTES / INSUCESSOS</div>
+                </div>
 
-        <div class="card mb-3">
-          <div class="card-body">
-            <h5 class="brand-title" style="font-size:16px;">Importar do HTML (Ctrl+U)</h5>
-            <textarea id="html-input" class="form-control mb-3" rows="8" placeholder="Cole o código fonte (Ctrl+U) da página do Mercado Livre aqui..."></textarea>
-            <button id="import-btn" class="btn btn-primary btn-lg btn-block font-weight-bold">Importar/Salvar Rotas do HTML</button>
-          </div>
-        </div>
-        <button class="btn btn-black btn-block">FECHAMENTO DIÁRIO</button>
-      </div>
+                <div class="card mb-3 brand-card">
+                    <div class="card-body">
+                        <h5 class="brand-title" style="font-size:16px;">Rotas salvas</h5>
+                        <div class="row no-gutters">
+                            <div class="col-8 pr-2">
+                                <select id="saved-routes" class="form-control"><option>(Nenhuma selecionada)</option></select>
+                            </div>
+                            <div class="col-4">
+                                <button class="btn btn-orange btn-block">Carregar</button>
+                            </div>
+                        </div>
+                        <button class="btn btn-black btn-block mt-3" style="height: 45px;">FECHAMENTO DIÁRIO</button>
+                    </div>
+                </div>
 
-      <div id="work-view" class="d-none">
-        <div class="text-center mb-3">
-          <h2 id="route-name-display" class="brand-title" style="color:#ff6a00">---</h2>
-          <h5 id="route-id-display" class="brand-subtle">ID: ---</h5>
-        </div>
-
-        <div class="card mb-3 text-center">
-          <div class="card-body">
-            <div class="row">
-              <div class="col-6 border-right">
-                <div class="small text-muted">PENDENTES</div>
-                <strong id="stat-pending" style="font-size: 32px;">0</strong>
-              </div>
-              <div class="col-6">
-                <div class="small text-muted text-success">RECEBIDOS</div>
-                <strong id="stat-done" style="font-size: 32px;" class="text-success">0</strong>
-              </div>
+                <div class="card brand-card">
+                    <div class="card-body">
+                        <h5 class="brand-title" style="font-size:16px;">Importar Nova Rota</h5>
+                        <textarea id="html-input" class="form-control mb-3" rows="6" placeholder="Cole o HTML (Ctrl+U) aqui..."></textarea>
+                        <button id="import-btn" class="btn btn-primary btn-lg btn-block font-weight-bold" style="height: 55px; font-size: 16px;">Importar/Salvar Rotas do HTML</button>
+                    </div>
+                </div>
             </div>
-            <div class="progress mt-3">
-              <div id="progress-bar" class="progress-bar" style="width: 0%"></div>
+
+            <div id="work-view" class="d-none">
+                <div class="text-center">
+                    <h2 id="route-name" class="brand-title" style="color:#ff6a00">---</h2>
+                    <h5 id="route-id" class="brand-subtle">ID: ---</h5>
+                </div>
+
+                <div class="card mb-3 brand-card">
+                    <div class="card-body text-center">
+                        <div class="row">
+                            <div class="col-6 border-right">
+                                <div class="small text-muted font-weight-bold">PENDENTES</div>
+                                <strong id="count-pending" style="font-size: 34px; color: #333;">0</strong>
+                            </div>
+                            <div class="col-6">
+                                <div class="small text-muted font-weight-bold text-success">RECEBIDOS</div>
+                                <strong id="count-done" style="font-size: 34px;" class="text-success">0</strong>
+                            </div>
+                        </div>
+                        <div class="progress mt-3">
+                            <div id="bar" class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <input type="text" id="barcode-input" class="form-control mb-4" placeholder="BIPE O PACOTE AQUI" autofocus autocomplete="off">
+
+                <div class="row text-center no-gutters">
+                    <div class="col-3 px-1"><h6>OK</h6><ul id="list-ok" class="list-section"></ul></div>
+                    <div class="col-3 px-1"><h6>Pendente</h6><ul id="list-pending" class="list-section"></ul></div>
+                    <div class="col-3 px-1"><h6>Fora</h6><ul id="list-error" class="list-section"></ul></div>
+                    <div class="col-3 px-1"><h6>Dup</h6><ul id="list-dup" class="list-section"></ul></div>
+                </div>
+
+                <button id="msg-btn" class="btn btn-success btn-lg btn-block mt-4 font-weight-bold" style="height: 60px;">GERAR MENSAGEM WHATSAPP</button>
+                <button onclick="location.reload()" class="btn btn-link btn-block text-muted mt-2">Sair desta rota</button>
             </div>
-          </div>
+
         </div>
-
-        <input type="text" id="barcode-input" class="form-control mb-4" placeholder="Bipe o pacote..." autofocus autocomplete="off">
-
-        <div class="row text-center">
-          <div class="col-3"><h6>OK</h6><ul id="list-ok" class="list-section"></ul></div>
-          <div class="col-3"><h6>Pendente</h6><ul id="list-pending" class="list-section"></ul></div>
-          <div class="col-3"><h6>Fora</h6><ul id="list-error" class="list-section"></ul></div>
-          <div class="col-3"><h6>Dup</h6><ul id="list-dup" class="list-section"></ul></div>
-        </div>
-
-        <button id="whatsapp-btn" class="btn btn-success btn-lg btn-block mt-4 font-weight-bold">COPIAR RELATÓRIO WHATSAPP</button>
-        <button onclick="location.reload()" class="btn btn-link btn-block text-muted">Voltar e Limpar</button>
-      </div>
-
     </div>
-  </div>
 </div>
 
 <script>
-let app = { pendentes: [], recebidos: [], fora: [], id: "", nome: "" };
+let app = { pendentes: [], ok: [], fora: [], id: "", nome: "" };
 
+// IMPORTAÇÃO
 document.getElementById('import-btn').onclick = function() {
-    const html = document.getElementById('html-input').value;
-    if(!html) return alert("Por favor, cole o HTML primeiro!");
+    const raw = document.getElementById('html-input').value;
+    if(!raw) return alert("Cole o HTML!");
 
-    // 1. Captura o ID da Rota (Ex: 356750297)
-    const idRotaMatch = html.match(/detail\/(\d+)/);
-    app.id = idRotaMatch ? idRotaMatch[1] : "---";
+    // Metadados
+    const idM = raw.match(/detail\/(\d+)/);
+    app.id = idM ? idM[1] : "---";
+    const titleM = raw.match(/<title[^>]*>.*?\|\s*([^<|]+)/i);
+    app.nome = titleM ? titleM[1].trim() : "Rota EMN1";
 
-    // 2. Captura o Prefixo/Nome da Rota (Ex: H13_AM4)
-    const titleMatch = html.match(/<title[^>]*>.*?\|\s*([^<|]+)/i);
-    app.nome = titleMatch ? titleMatch[1].trim() : "Rota Local";
+    // FILTRO EXCLUSIVO shipment_id (como solicitado)
+    const regex = /"shipment_id":\s*(\d{11})/g;
+    let match, ids = [];
+    while ((match = regex.exec(raw)) !== null) { ids.push(match[1]); }
 
-    // 3. FILTRO EXCLUSIVO: shipment_id
-    // Este regex busca apenas números de 11 dígitos que venham após "shipment_id":
-    const regexShipment = /"shipment_id":\s*(\d{11})/g;
-    let match;
-    let idsEncontrados = [];
-
-    while ((match = regexShipment.exec(html)) !== null) {
-        idsEncontrados.push(match[1]);
-    }
-
-    if(idsEncontrados.length > 0) {
-        // Remove duplicados e garante que não pegou o ID da rota por engano
-        app.pendentes = [...new Set(idsEncontrados)].filter(id => id !== app.id);
-        app.recebidos = [];
-        app.fora = [];
-
-        document.getElementById('route-name-display').innerText = "Rota: " + app.nome;
-        document.getElementById('route-id-display').innerText = "ID: " + app.id;
+    if(ids.length > 0) {
+        app.pendentes = [...new Set(ids)].filter(x => x !== app.id);
+        document.getElementById('route-name').innerText = "Rota: " + app.nome;
+        document.getElementById('route-id').innerText = "ID: " + app.id;
         document.getElementById('setup-view').classList.add('d-none');
         document.getElementById('work-view').classList.remove('d-none');
-        updateUI();
+        render();
         setTimeout(() => document.getElementById('barcode-input').focus(), 500);
     } else {
-        alert("Nenhum 'shipment_id' de 11 dígitos encontrado. Verifique se copiou o código fonte (Ctrl+U) da página de detalhes da rota.");
+        alert("Nenhum shipment_id de 11 dígitos encontrado!");
     }
 };
 
+// BIPAGEM
 document.getElementById('barcode-input').onkeypress = function(e) {
     if (e.key === 'Enter') {
         const val = this.value.trim();
         if (!val) return;
-
         if (app.pendentes.includes(val)) {
             app.pendentes = app.pendentes.filter(p => p !== val);
-            app.recebidos.unshift(val);
+            app.ok.unshift(val);
             beep(880);
-        } else if (app.recebidos.includes(val)) {
-            alert("Pacote já conferido!");
+        } else if (app.ok.includes(val)) {
+            alert("Pacote já lido!");
         } else {
             if(!app.fora.includes(val)) app.fora.unshift(val);
             beep(350);
         }
         this.value = "";
-        updateUI();
+        render();
     }
 };
 
-document.getElementById('whatsapp-btn').onclick = function() {
-    const total = app.pendentes.length + app.recebidos.length;
-    const ds = total > 0 ? ((app.recebidos.length / total) * 100).toFixed(1) : "0.0";
+// WHATSAPP
+document.getElementById('msg-btn').onclick = function() {
+    const total = app.pendentes.length + app.ok.length;
+    const ds = total > 0 ? ((app.ok.length / total) * 100).toFixed(1) : "0.0";
     const hora = new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
     
-    let msg = `↩ RTS - Rota: ${app.id}\n🏭 SVC: EMN1\n🕗 ORHC: ${hora}\n🟢 %DS: ${ds}%\n🟡 Pendentes: ${app.pendentes.length}\n🔴 Insucessos: ${app.fora.length}\n\nJustificativa: Rota ${app.nome}\n`;
+    let msg = `↩ RTS - Rota: ${app.id}\n🏭 SVC/XPT: EMN1 - Imperatriz\n🕗 ORHC: ${hora} h\n🟢 %DS: ${ds} %\n🟡 Pendentes: ${app.pendentes.length}\n🔴 Insucessos: ${app.fora.length}\n\n♎ Justificativa:\nRota ${app.nome}\nrodacoop | Motorista\n\n`;
     
-    if(app.fora.length > 0) msg += `\n*Fora de Rota:*\n${app.fora.join('\n')}`;
-    if(app.pendentes.length > 0) msg += `\n\n*Pendentes:*\n${app.pendentes.join('\n')}`;
+    if(app.fora.length > 0) msg += `*Fora de Rota:*\n${app.fora.join('\n')}\n`;
+    if(app.pendentes.length > 0) msg += `\n*Pendentes:*\n${app.pendentes.join('\n')}`;
 
-    navigator.clipboard.writeText(msg).then(() => alert("Relatório copiado!"));
+    navigator.clipboard.writeText(msg).then(() => alert("Copiado com sucesso!"));
 };
 
-function updateUI() {
-    document.getElementById('stat-pending').innerText = app.pendentes.length;
-    document.getElementById('stat-done').innerText = app.recebidos.length;
-    const total = app.pendentes.length + app.recebidos.length;
-    document.getElementById('progress-bar').style.width = (total > 0 ? (app.recebidos.length/total*100) : 0) + "%";
+function render() {
+    document.getElementById('count-pending').innerText = app.pendentes.length;
+    document.getElementById('count-done').innerText = app.ok.length;
+    const total = app.pendentes.length + app.ok.length;
+    document.getElementById('bar').style.width = (total > 0 ? (app.ok.length/total*100) : 0) + "%";
 
-    document.getElementById('list-ok').innerHTML = app.recebidos.map(i => `<li class="list-group-item text-success">✅ ${i}</li>`).join('');
+    document.getElementById('list-ok').innerHTML = app.ok.map(i => `<li class="list-group-item text-success">✅ ${i}</li>`).join('');
     document.getElementById('list-pending').innerHTML = app.pendentes.map(i => `<li class="list-group-item text-danger">❌ ${i}</li>`).join('');
     document.getElementById('list-error').innerHTML = app.fora.map(i => `<li class="list-group-item text-warning">⚠️ ${i}</li>`).join('');
 }
 
 function beep(f) {
-    try {
-        const ctx = new AudioContext();
-        const osc = ctx.createOscillator();
-        osc.frequency.value = f;
-        osc.connect(ctx.destination);
-        osc.start(); osc.stop(ctx.currentTime + 0.1);
-    } catch(e) {}
+    const ctx = new AudioContext();
+    const osc = ctx.createOscillator();
+    osc.frequency.value = f;
+    osc.connect(ctx.destination);
+    osc.start(); osc.stop(ctx.currentTime + 0.1);
 }
 </script>
 </body>
