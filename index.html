@@ -3,177 +3,146 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Conferência de Rota - IDs Pendentes</title>
-  
+  <title>Conferência de Rota - Rodacoop</title>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://onildopr.github.io/rodacoop.ui/css/rodacoop.css">
-  
   <style>
-    .list-section { height: 350px; overflow-y: auto; background: #fff; border: 1px solid #dee2e6; border-radius: 4px; list-style: none; padding: 0; }
-    .list-group-item { padding: 6px 10px; font-family: monospace; font-size: 13px; border-bottom: 1px solid #eee !important; margin-bottom: 0; }
-    #barcode-input { font-weight: bold; font-size: 1.3rem; border: 2px solid #ff6a00; height: 55px; }
-    .btn-orange { background-color: #ff6a00; color: white; border: none; font-weight: bold; }
-    .btn-black { background-color: #000; color: white; border: none; font-weight: bold; }
+    .list-section { height: 350px; overflow-y: auto; background: #fff; border: 1px solid #dee2e6; border-radius: 4px; padding: 0; }
+    .list-group-item { padding: 4px 8px; font-family: monospace; font-size: 13px; border-bottom: 1px solid #eee !important; list-style: none; }
+    #barcode-input { font-weight: bold; border: 3px solid #ff6a00; height: 55px; font-size: 1.5rem; text-align: center; }
+    .btn-orange { background-color: #ff6a00; color: white; font-weight: bold; }
+    .btn-black { background-color: #000; color: white; font-weight: bold; }
   </style>
 </head>
 <body class="rk-scope">
 
 <div class="container pt-4">
-  <div id="initial-interface">
-    <div class="text-center mb-3">
+  <div id="tela-inicial">
+    <div class="text-center mb-4">
       <h2 class="brand-title">Conferência de Rota</h2>
-      <div class="brand-subtle">IDs pendentes / insucessos</div>
+      <div class="brand-subtle">EMN1 - Imperatriz</div>
     </div>
 
     <div class="card mb-3 brand-card">
       <div class="card-body">
-        <h5 class="mb-2 brand-title" style="font-size:16px;">Rotas salvas</h5>
-        <div class="row">
-          <div class="col-md-8"><select id="saved-routes" class="form-control"><option value="">(Nenhuma selecionada)</option></select></div>
-          <div class="col-md-4 mt-2 mt-md-0"><button class="btn btn-orange btn-block">Carregar rota</button></div>
-        </div>
-        <div class="row mt-2">
-          <div class="col-md-12"><button class="btn btn-black btn-block">FECHAMENTO DIÁRIO</button></div>
-        </div>
+        <h5 class="brand-title" style="font-size:16px;">Importar Rota (HTML)</h5>
+        <textarea id="html-input" class="form-control mb-3" rows="10" placeholder="Cole aqui o código fonte (Ctrl+U)"></textarea>
+        <button id="import-btn" class="btn btn-primary btn-lg btn-block">Importar/Salvar Rotas do HTML</button>
       </div>
     </div>
-
-    <textarea id="html-input" class="form-control mb-3" rows="8" placeholder="COLE O HTML AQUI (Ctrl+U, Ctrl+A, Ctrl+C e cole)"></textarea>
-    <button id="extract-btn" class="btn btn-primary btn-lg btn-block">Importar/Salvar Rotas do HTML</button>
+    <button class="btn btn-black btn-block">FECHAMENTO DIÁRIO</button>
   </div>
 
-  <div id="conference-interface" class="d-none">
+  <div id="tela-conferencia" class="d-none">
     <div class="text-center mb-3">
-      <h2 id="route-title" class="brand-title" style="color: #ff6a00;">Nome da Rota</h2>
-      <h4 id="id-rota-display" class="brand-subtle">ID: ---</h4>
+      <h2 id="nome-rota" class="brand-title" style="color:#ff6a00">---</h2>
+      <h5 id="id-rota" class="brand-subtle">ID: ---</h5>
     </div>
 
-    <div class="card mb-3 brand-card">
-      <div class="card-body text-center">
+    <div class="card mb-3 brand-card text-center">
+      <div class="card-body">
         <div class="row">
-          <div class="col-6"><div>PENDENTES</div><strong id="extracted-total" style="font-size: 25px;">0</strong></div>
-          <div class="col-6"><div>RECEBIDOS</div><strong id="verified-total" style="font-size: 25px;" class="text-success">0</strong></div>
+          <div class="col-6"><div>PENDENTES</div><strong id="total-pendente" style="font-size: 30px;">0</strong></div>
+          <div class="col-6"><div>RECEBIDOS</div><strong id="total-recebido" style="font-size: 30px;" class="text-success">0</strong></div>
         </div>
-        <div class="progress mt-3"><div id="progress-bar" class="progress-bar bg-warning" style="width: 0%"></div></div>
+        <div class="progress mt-3"><div id="progresso" class="progress-bar bg-warning" style="width: 0%"></div></div>
       </div>
     </div>
 
-    <input type="text" id="barcode-input" class="form-control mb-3 text-center" placeholder="BIPE O PACOTE AQUI" autofocus>
+    <input type="text" id="barcode-input" class="form-control mb-3" placeholder="BIPE O PACOTE" autofocus autocomplete="off">
 
-    <div class="row text-center mt-4">
-      <div class="col-md-3"><h6>Recebidos</h6><ul id="conferidos-list" class="list-section"></ul></div>
-      <div class="col-md-3"><h6>Pendentes</h6><ul id="faltantes-list" class="list-section"></ul></div>
-      <div class="col-md-3"><h6>Fora de Rota</h6><ul id="fora-rota-list" class="list-section"></ul></div>
-      <div class="col-md-3"><h6>Duplicados</h6><ul id="duplicados-list" class="list-section"></ul></div>
+    <div class="row text-center">
+      <div class="col-md-3"><h6>Recebidos</h6><ul id="lista-ok" class="list-section"></ul></div>
+      <div class="col-md-3"><h6>Pendentes</h6><ul id="lista-pendente" class="list-section"></ul></div>
+      <div class="col-md-3"><h6>Fora de Rota</h6><ul id="lista-fora" class="list-section"></ul></div>
+      <div class="col-md-3"><h6>Duplicados</h6><ul id="lista-dup" class="list-section"></ul></div>
     </div>
 
-    <button id="generate-report-btn" class="btn btn-success btn-lg btn-block mt-4">GERAR MENSAGEM WHATSAPP 📱</button>
-    <button onclick="location.reload()" class="btn btn-link btn-block text-muted">Limpar e Voltar</button>
+    <button id="btn-whatsapp" class="btn btn-success btn-lg btn-block mt-4">GERAR MENSAGEM WHATSAPP</button>
+    <button onclick="location.reload()" class="btn btn-link btn-block text-muted">Voltar</button>
   </div>
 </div>
 
 <script>
-let bancoDeDados = { pendentes: [], conferidos: [], foraRota: [], idRota: "", nomeRota: "" };
+let dados = { pendentes: [], recebidos: [], fora: [], id: "", nome: "" };
 
-// BOTÃO IMPORTAR - VERSÃO CORRIGIDA
-document.getElementById('extract-btn').onclick = function() {
-    const textoBruto = document.getElementById('html-input').value;
-    if(!textoBruto) return alert("Cole o conteúdo primeiro!");
+document.getElementById('import-btn').onclick = function() {
+    const texto = document.getElementById('html-input').value;
+    if(!texto) return alert("Cole o HTML primeiro!");
 
-    // 1. Pega ID da Rota
-    const idRotaMatch = textoBruto.match(/detail\/(\d+)/);
-    bancoDeDados.idRota = idRotaMatch ? idRotaMatch[1] : "Não identificado";
+    // 1. Extrai o Nome da Rota do <title>
+    const nomeMatch = texto.match(/<title id="root-title">.*?\|\s*(.*?)<\/title>/);
+    dados.nome = nomeMatch ? nomeMatch[1].trim() : "Rota Desconhecida";
 
-    // 2. Tenta pegar o nome da rota (ex: F18_AM2)
-    const nomeMatch = textoBruto.match(/\|\s*([^|]+?)\s*\|/);
-    bancoDeDados.nomeRota = nomeMatch ? nomeMatch[1].trim() : "EMN1";
+    // 2. Extrai o ID da Rota da URL ou do texto (ex: 356750297)
+    const idMatch = texto.match(/detail\/(\d+)/);
+    dados.id = idMatch ? idMatch[1] : "---";
 
-    // 3. BUSCA IDs (Pega tudo que tem 11 números seguidos)
-    // O segredo está aqui: o match(/\b\d{11}\b/g) ignora o HTML e pega só os números
-    let idsEncontrados = textoBruto.match(/\b\d{11}\b/g);
+    // 3. O PULO DO GATO: Busca todos os IDs de 11 dígitos
+    // Filtramos para ignorar o ID da própria rota (que tem 9 dígitos no seu exemplo)
+    const achados = texto.match(/\b\d{11}\b/g);
 
-    if(idsEncontrados && idsEncontrados.length > 0) {
-        // Limpa duplicados e atualiza banco
-        bancoDeDados.pendentes = [...new Set(idsEncontrados)];
-        bancoDeDados.conferidos = [];
-        bancoDeDados.foraRota = [];
-
-        // Atualiza Interface
-        document.getElementById('route-title').innerText = "Rota: " + bancoDeDados.nomeRota;
-        document.getElementById('id-rota-display').innerText = "ID: " + bancoDeDados.idRota;
-        document.getElementById('initial-interface').classList.add('d-none');
-        document.getElementById('conference-interface').classList.remove('d-none');
+    if (achados && achados.length > 0) {
+        dados.pendentes = [...new Set(achados)];
         
-        atualizarPainel();
+        document.getElementById('nome-rota').innerText = "Rota: " + dados.nome;
+        document.getElementById('id-rota').innerText = "ID: " + dados.id;
+        document.getElementById('tela-inicial').classList.add('d-none');
+        document.getElementById('tela-conferencia').classList.remove('d-none');
+        
+        atualizar();
         setTimeout(() => document.getElementById('barcode-input').focus(), 500);
     } else {
-        alert("Nenhum ID de 11 dígitos foi encontrado no texto colado. Verifique se copiou a página inteira.");
+        alert("Nenhum pacote encontrado. Verifique se copiou o código fonte (Ctrl+U) corretamente.");
     }
 };
 
-// BIPAGEM E SOM
 document.getElementById('barcode-input').onkeypress = function(e) {
     if (e.key === 'Enter') {
-        const id = this.value.trim();
-        if (!id) return;
+        const bip = this.value.trim();
+        if (!bip) return;
 
-        if (bancoDeDados.pendentes.includes(id)) {
-            bancoDeDados.pendentes = bancoDeDados.pendentes.filter(p => p !== id);
-            bancoDeDados.conferidos.unshift(id);
-            tocarSom(880);
-        } else if (bancoDeDados.conferidos.includes(id)) {
-            alert("Já conferido!");
+        if (dados.pendentes.includes(bip)) {
+            dados.pendentes = dados.pendentes.filter(p => p !== bip);
+            dados.recebidos.unshift(bip);
+            tocar(880);
+        } else if (dados.recebidos.includes(bip)) {
+            alert("Já foi conferido!");
         } else {
-            if(!bancoDeDados.foraRota.includes(id)) bancoDeDados.foraRota.unshift(id);
-            tocarSom(350);
+            if(!dados.fora.includes(bip)) dados.fora.unshift(bip);
+            tocar(350);
         }
         this.value = "";
-        atualizarPainel();
+        atualizar();
     }
 };
 
-// RELATÓRIO WHATSAPP
-document.getElementById('generate-report-btn').onclick = function() {
-    const total = bancoDeDados.pendentes.length + bancoDeDados.conferidos.length;
-    const ds = total > 0 ? ((bancoDeDados.conferidos.length / total) * 100).toFixed(1) : "0.0";
-    const agora = new Date();
-    const hora = agora.getHours().toString().padStart(2, '0') + ":" + agora.getMinutes().toString().padStart(2, '0');
-
-    let msg = `↩ RTS - Rota: ${bancoDeDados.idRota}\n🏭 SVC/XPT: EMN1 - Imperatriz\n🕗 ORHC: ${hora} h\n🟢 %DS: ${ds} %\n🟡 Pendentes: ${bancoDeDados.pendentes.length}\n🔴 Insucessos: ${bancoDeDados.foraRota.length}\n\n♎ Justificativa:\nRota ${bancoDeDados.nomeRota}\nrodacoop | Motorista\n\n`;
-    
-    if(bancoDeDados.foraRota.length > 0) {
-        msg += `*IDs Outra Área:*\n`;
-        bancoDeDados.foraRota.forEach(id => msg += `${id}\n`);
-    }
-    
-    if(bancoDeDados.pendentes.length > 0) {
-        msg += `\n*IDs Pendentes:*\n`;
-        bancoDeDados.pendentes.forEach(id => msg += `${id}\n`);
-    }
-
+document.getElementById('btn-whatsapp').onclick = function() {
+    const total = dados.pendentes.length + dados.recebidos.length;
+    const ds = total > 0 ? ((dados.recebidos.length / total) * 100).toFixed(1) : "0.0";
+    const hora = new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+    let msg = `↩ RTS - Rota: ${dados.id}\n🏭 SVC/XPT: EMN1 - Imperatriz\n🕗 ORHC: ${hora} h\n🟢 %DS: ${ds} %\n🟡 Pendentes: ${dados.pendentes.length}\n🔴 Insucessos: ${dados.fora.length}\n\n♎ Justificativa:\nRota ${dados.nome}\nrodacoop | Motorista\n\n`;
+    if(dados.fora.length > 0) msg += `*Fora de Rota:*\n${dados.fora.join('\n')}\n`;
+    if(dados.pendentes.length > 0) msg += `\n*Pendentes:*\n${dados.pendentes.join('\n')}`;
     navigator.clipboard.writeText(msg).then(() => alert("Copiado!"));
 };
 
-function atualizarPainel() {
-    document.getElementById('extracted-total').innerText = bancoDeDados.pendentes.length;
-    document.getElementById('verified-total').innerText = bancoDeDados.conferidos.length;
-    const total = bancoDeDados.pendentes.length + bancoDeDados.conferidos.length;
-    const perc = total > 0 ? (bancoDeDados.conferidos.length / total) * 100 : 0;
-    document.getElementById('progress-bar').style.width = perc + "%";
-
-    document.getElementById('conferidos-list').innerHTML = bancoDeDados.conferidos.map(i => `<li class="list-group-item text-success">✅ ${i}</li>`).join('');
-    document.getElementById('faltantes-list').innerHTML = bancoDeDados.pendentes.map(i => `<li class="list-group-item text-danger">❌ ${i}</li>`).join('');
-    document.getElementById('fora-rota-list').innerHTML = bancoDeDados.foraRota.map(i => `<li class="list-group-item text-warning">⚠️ ${i}</li>`).join('');
+function atualizar() {
+    document.getElementById('total-pendente').innerText = dados.pendentes.length;
+    document.getElementById('total-recebido').innerText = dados.recebidos.length;
+    const total = dados.pendentes.length + dados.recebidos.length;
+    document.getElementById('progresso').style.width = (total > 0 ? (dados.recebidos.length/total*100) : 0) + "%";
+    document.getElementById('lista-ok').innerHTML = dados.recebidos.map(i => `<li class="list-group-item text-success">✅ ${i}</li>`).join('');
+    document.getElementById('lista-pendente').innerHTML = dados.pendentes.map(i => `<li class="list-group-item text-danger">❌ ${i}</li>`).join('');
+    document.getElementById('lista-fora').innerHTML = dados.fora.map(i => `<li class="list-group-item text-warning">⚠️ ${i}</li>`).join('');
 }
 
-function tocarSom(f) {
-    try {
-        const c = new AudioContext();
-        const o = c.createOscillator();
-        o.frequency.value = f;
-        o.connect(c.destination);
-        o.start(); o.stop(c.currentTime + 0.1);
-    } catch(e) {}
+function tocar(f) {
+    const c = new AudioContext();
+    const o = c.createOscillator();
+    o.frequency.value = f;
+    o.connect(c.destination);
+    o.start(); o.stop(c.currentTime + 0.1);
 }
 </script>
 </body>
