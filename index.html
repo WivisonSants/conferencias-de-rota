@@ -3,19 +3,23 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Conferência de Rota | Rodacoop</title>
+    <title>Recebimento de Rota | Rodacoop</title>
     
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://onildopr.github.io/rodacoop.ui/css/rodacoop.css">
     
     <style>
-        /* Ajustes de precisão para bater com o layout dele */
-        .rk-scope .list-section { height: 320px; border: 1px solid #ddd; background: #fff; border-radius: 4px; }
-        .rk-scope .list-group-item { padding: 4px 8px; font-family: monospace; font-size: 11px; border-bottom: 1px solid #eee !important; list-style: none; }
-        #barcode-input { font-weight: bold; font-size: 1.6rem; border: 3px solid #ff6a00; height: 65px; text-align: center; border-radius: 10px; width: 100%; }
-        .btn-success-lg { background-color: #28a745; color: white; font-weight: bold; height: 60px; font-size: 18px; width: 100%; border-radius: 8px; border: none; cursor: pointer; display: block; margin-top: 15px; }
-        textarea#whatsapp-preview { font-family: monospace; font-size: 12px; background-color: #f9f9f9; color: #333; resize: none; }
-        .motivo-tag { font-size: 9px; color: #d9534f; font-weight: bold; display: block; }
+        /* Ajustes manuais para forçar a aparência do AngularJS do Onildo */
+        body { background-color: #f4f7f6; }
+        .rk-scope .list-section { height: 320px; overflow-y: auto; background: #fff; border: 1px solid #dee2e6; }
+        .rk-scope .list-group-item { padding: 5px 10px; font-size: 11px; font-family: 'Courier New', Courier, monospace; border-bottom: 1px solid #eee !important; }
+        #barcode-input { font-weight: bold; font-size: 22px; border: 2px solid #ff6a00; height: 55px; text-align: center; border-radius: 5px; }
+        .progress { height: 25px; border-radius: 5px; background-color: #e9ecef; }
+        .progress-bar { font-weight: bold; line-height: 25px; font-size: 14px; }
+        .card { border: none; border-radius: 8px; }
+        h6 { font-weight: bold; color: #555; text-transform: uppercase; font-size: 12px; margin-bottom: 5px; }
+        .btn-success-lg { background-color: #28a745; border: none; color: white; font-weight: bold; padding: 15px; font-size: 18px; width: 100%; border-radius: 5px; transition: 0.2s; }
+        .btn-success-lg:hover { background-color: #218838; }
     </style>
 </head>
 <body class="rk-scope">
@@ -28,8 +32,8 @@
         </div>
         <div class="card shadow-sm">
             <div class="card-body">
-                <h5 class="brand-title" style="font-size:16px;">Importar do HTML (Ctrl+U)</h5>
-                <textarea id="html-input" class="form-control mb-3" rows="8" placeholder="Abra a rota no ML, pressione Ctrl+U, depois Ctrl+A, copie e cole aqui..."></textarea>
+                <h5 class="brand-title" style="font-size:16px; margin-bottom: 15px;">Importar do HTML (Ctrl+U)</h5>
+                <textarea id="html-input" class="form-control mb-3" rows="8" placeholder="Pressione Ctrl+U no ML, Ctrl+A, copie tudo e cole aqui..."></textarea>
                 <button id="import-btn" class="btn btn-primary btn-lg btn-block font-weight-bold">ANALISAR ROTA</button>
             </div>
         </div>
@@ -37,65 +41,84 @@
 
     <div id="work-view" class="d-none">
         <div class="text-center mb-3">
-            <h2 id="ui-route-id" class="brand-title" style="color:#ff6a00; font-size: 28px;">---</h2>
-            <h5 id="ui-driver" class="brand-subtle">Motorista: ---</h5>
+            <h2 id="ui-route-id" class="brand-title" style="color:#ff6a00; font-size: 32px; font-weight: 900;">---</h2>
+            <h5 id="ui-driver" class="brand-subtle" style="font-size: 18px;">Motorista: ---</h5>
         </div>
 
         <div class="card mb-3 text-center shadow-sm">
-            <div class="card-body py-2">
+            <div class="card-body py-3">
                 <div class="row">
-                    <div class="col-4 border-right"><h6>PENDENTES</h6><strong id="count-p" style="font-size: 30px;">0</strong></div>
-                    <div class="col-4 border-right text-success"><h6>RECEBIDOS</h6><strong id="count-ok" style="font-size: 30px;">0</strong></div>
-                    <div class="col-4 text-danger"><h6>FALHAS</h6><strong id="count-fail" style="font-size: 30px;">0</strong></div>
+                    <div class="col-4 border-right">
+                        <h6>PENDENTES</h6>
+                        <span id="count-p" style="font-size: 32px; font-weight: bold; color: #333;">0</span>
+                    </div>
+                    <div class="col-4 border-right">
+                        <h6 class="text-success">RECEBIDOS</h6>
+                        <span id="count-ok" style="font-size: 32px; font-weight: bold; color: #28a745;">0</span>
+                    </div>
+                    <div class="col-4">
+                        <h6 class="text-danger">FALHAS</h6>
+                        <span id="count-fail" style="font-size: 32px; font-weight: bold; color: #dc3545;">0</span>
+                    </div>
                 </div>
-                <div class="progress mt-2"><div id="ui-bar" class="progress-bar bg-warning" style="width: 0%"></div></div>
+                <div class="progress mt-3">
+                    <div id="ui-bar" class="progress-bar bg-warning text-dark" style="width: 0%">0%</div>
+                </div>
             </div>
         </div>
 
-        <input type="text" id="barcode-input" class="form-control mb-4" placeholder="BIPE O PACOTE AQUI" autofocus autocomplete="off">
+        <div class="form-group">
+            <input type="text" id="barcode-input" class="form-control" placeholder="BIPE O PACOTE AQUI" autofocus autocomplete="off">
+        </div>
 
         <div class="row text-center no-gutters mb-4">
-            <div class="col-3 px-1"><h6>OK</h6><ul id="list-ok" class="list-section"></ul></div>
-            <div class="col-3 px-1"><h6>Pendente</h6><ul id="list-pending" class="list-section"></ul></div>
-            <div class="col-3 px-1"><h6>Insucesso</h6><ul id="list-fail" class="list-section"></ul></div>
-            <div class="col-3 px-1"><h6>Fora</h6><ul id="list-out" class="list-section"></ul></div>
+            <div class="col-3 px-1"><h6>OK</h6><div id="list-ok" class="list-section"></div></div>
+            <div class="col-3 px-1"><h6>Pendente</h6><div id="list-pending" class="list-section"></div></div>
+            <div class="col-3 px-1"><h6>Insucesso</h6><div id="list-fail" class="list-section"></div></div>
+            <div class="col-3 px-1"><h6>Fora</h6><div id="list-out" class="list-section"></div></div>
         </div>
 
-        <div class="card mb-2 shadow-sm">
+        <div class="card mb-3 shadow-sm">
             <div class="card-body p-2">
-                <label class="small font-weight-bold text-primary">RELATÓRIO WHATSAPP:</label>
-                <textarea id="whatsapp-preview" class="form-control" rows="6" readonly></textarea>
+                <label class="small font-weight-bold text-primary ml-1">RELATÓRIO WHATSAPP:</label>
+                <textarea id="whatsapp-preview" class="form-control" rows="6" readonly style="border:none; background: transparent;"></textarea>
             </div>
         </div>
 
-        <button id="copy-btn" class="btn btn-success-lg">COPIAR MENSAGEM WHATSAPP</button>
-        <button onclick="location.reload()" class="btn btn-link btn-block text-muted mt-2">Sair da Rota / Limpar</button>
+        <button id="copy-btn" class="btn btn-success-lg shadow">COPIAR MENSAGEM WHATSAPP</button>
+        <button onclick="location.reload()" class="btn btn-link btn-block text-muted mt-2">Sair da Rota</button>
     </div>
 </div>
 
 <script>
-let app = { id: "", driver: "", orh: "---", p: [], ok: [], fail: [], out: [] };
+let app = { id: "", driver: "", orh: "00:00", p: [], ok: [], fail: [], out: [] };
 
 document.getElementById('import-btn').onclick = function() {
     const raw = document.getElementById('html-input').value;
     if(!raw) return alert("Cole o código fonte!");
 
-    // Extração fiel baseada na estrutura de dados do ML
+    // Captura exata dos dados do Mercado Livre
     app.id = (raw.match(/detail\/(\d+)/) || raw.match(/"id":(\d{9,})/) || ["", "---"])[1];
     app.driver = (raw.match(/"driverName":"(.*?)"/) || raw.match(/"driver_name":"(.*?)"/) || ["", "Não identificado"])[1];
     app.orh = (raw.match(/"durationText":"(.*?)"/) || raw.match(/"duration":"(.*?)"/) || ["", "---"])[1];
 
+    // Limpeza de listas
+    app.p = []; app.ok = []; app.fail = []; app.out = [];
+    let vistos = new Set();
+
+    // REGEX para IDs de 11 dígitos dentro do JSON do ML
     const regex = /"id":(\d{11}),.*?"status":"(.*?)"(?:.*?"substatus":"(.*?)")?/g;
-    let m; let vistos = new Set();
-    app.p = []; app.ok = []; app.fail = [];
+    let m;
 
     while ((m = regex.exec(raw)) !== null) {
         let id = m[1];
         if (vistos.has(id)) continue;
         vistos.add(id);
+
         let status = m[2];
         let sub = (m[3] || "").replace(/_/g, ' ');
         let item = { id, motivo: sub };
+
         if (status === 'delivered') app.ok.push(item);
         else if (status === 'not_delivered' || status === 'cancelled') app.fail.push(item);
         else app.p.push(item);
@@ -107,18 +130,28 @@ document.getElementById('import-btn').onclick = function() {
         document.getElementById('ui-route-id').innerText = "Rota: " + app.id;
         document.getElementById('ui-driver').innerText = "Motorista: " + app.driver;
         render();
-    } else { alert("Nenhum pacote encontrado!"); }
+    } else {
+        alert("Nenhum pacote de 11 dígitos encontrado!");
+    }
 };
 
 document.getElementById('barcode-input').onkeypress = function(e) {
     if (e.key === 'Enter') {
         const val = this.value.trim();
         if(!val) return;
+        
         let pIdx = app.p.findIndex(x => x.id === val);
         let fIdx = app.fail.findIndex(x => x.id === val);
-        if (pIdx !== -1) app.ok.unshift(app.p.splice(pIdx, 1)[0]);
-        else if (fIdx !== -1) app.ok.unshift(app.fail.splice(fIdx, 1)[0]);
-        else if (!app.ok.some(x => x.id === val) && !app.out.includes(val)) app.out.unshift(val);
+        
+        if (pIdx !== -1) {
+            app.ok.unshift(app.p.splice(pIdx, 1)[0]);
+        } else if (fIdx !== -1) {
+            app.ok.unshift(app.fail.splice(fIdx, 1)[0]);
+        } else {
+            if (!app.ok.some(x => x.id === val) && !app.out.includes(val)) {
+                app.out.unshift(val);
+            }
+        }
         this.value = ""; render();
     }
 };
@@ -126,16 +159,21 @@ document.getElementById('barcode-input').onkeypress = function(e) {
 function render() {
     const total = app.p.length + app.ok.length + app.fail.length;
     const ds = total > 0 ? ((app.ok.length / total) * 100).toFixed(1) : "0.0";
+    
     document.getElementById('count-p').innerText = app.p.length;
     document.getElementById('count-ok').innerText = app.ok.length;
     document.getElementById('count-fail').innerText = app.fail.length;
-    document.getElementById('ui-bar').style.width = ds + "%";
-    document.getElementById('list-ok').innerHTML = app.ok.map(x => `<li class="list-group-item text-success">✅ ${x.id}</li>`).join('');
-    document.getElementById('list-pending').innerHTML = app.p.map(x => `<li class="list-group-item text-danger">❌ ${x.id}</li>`).join('');
-    document.getElementById('list-fail').innerHTML = app.fail.map(x => `<li class="list-group-item text-warning">⚠️ ${x.id}<br><span class="motivo-tag">${x.motivo}</span></li>`).join('');
-    document.getElementById('list-out').innerHTML = app.out.map(x => `<li class="list-group-item text-dark">📦 ${x}</li>`).join('');
+    
+    const bar = document.getElementById('ui-bar');
+    bar.style.width = ds + "%";
+    bar.innerText = ds + "%";
 
-    let msg = `↩ RTS - Rota: ${app.id}\n🏭 SVC/XPT: EMN1 - Imperatriz\n🕗 ORH: ${app.orh}\n🟢 %DS: ${ds} %\n\n♎ Justificativa:\nMotorista: ${app.driver}\nSite: wivisonsants\nrodacoop | Conferência`;
+    document.getElementById('list-ok').innerHTML = app.ok.map(x => `<div class="list-group-item text-success">✅ ${x.id}</div>`).join('');
+    document.getElementById('list-pending').innerHTML = app.p.map(x => `<div class="list-group-item text-danger">❌ ${x.id}</div>`).join('');
+    document.getElementById('list-fail').innerHTML = app.fail.map(x => `<div class="list-group-item text-warning">⚠️ ${x.id}</div>`).join('');
+    document.getElementById('list-out').innerHTML = app.out.map(x => `<div class="list-group-item text-dark">📦 ${x}</div>`).join('');
+
+    let msg = `↩ RTS - Rota: ${app.id}\n🏭 SVC/XPT: EMN1 - Imperatriz\n🕗 ORH: ${app.orh}\n🟢 %DS: ${ds} %\n🟡 Pendentes: ${app.p.length}\n🔴 Insucessos: ${app.fail.length}\n\n♎ Justificativa:\nMotorista: ${app.driver}\nSite: wivisonsants\nrodacoop | Conferência`;
     document.getElementById('whatsapp-preview').value = msg;
 }
 
